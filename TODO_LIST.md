@@ -42,7 +42,7 @@
 
 - [ ] 🙋 AWS 계정 (또는 Lightsail $5 인스턴스) 생성 — 가이드 제공 예정
 - [ ] 🙋 Vercel 계정 생성 + GitHub 저장소 연결
-- [ ] 🤖 Dockerfile, GitHub Actions 워크플로, Nginx + Let's Encrypt(HTTPS)
+- [x] 🤖 Dockerfile, GitHub Actions 워크플로, Nginx + Let's Encrypt(HTTPS), 배포 스크립트 (`.github/workflows/backend.yml`, `infra/nginx.conf`, `infra/deploy.sh`, `infra/docker-compose.prod.yml`, `infra/.env.prod.example`, 가이드: `docs/DEPLOY_GUIDE.md`)
 - [ ] 🙋 가비아 DNS 설정 (A 레코드 → 서버 IP, CNAME → Vercel) — 화면별 가이드 제공 예정
 - [ ] 🙋 AWS Budget 비용 알람 + Anthropic 지출 한도 확인
 
