@@ -2,7 +2,7 @@
 # 서버측 배포 스크립트 — GitHub Actions 가 SSH 로 호출한다.
 # 배치 위치: /opt/singunu/deploy.sh  (chmod +x)
 # 사용법:   bash /opt/singunu/deploy.sh <이미지:태그>
-#   예)     bash /opt/singunu/deploy.sh ghcr.io/OWNER/singunu-api:ab12cd3
+#   예)     bash /opt/singunu/deploy.sh ghcr.io/singunu/singunu-api:ab12cd3
 #   인자 생략 시 :latest 로 동작.
 #
 # 전제:
@@ -14,7 +14,7 @@ set -euo pipefail
 
 CONTAINER="singunu-api"
 ENV_FILE="/opt/singunu/.env"
-DEFAULT_IMAGE="ghcr.io/OWNER/singunu-api:latest"   # 👈 OWNER 교체
+DEFAULT_IMAGE="ghcr.io/singunu/singunu-api:latest"   # 👈 OWNER 교체
 IMAGE="${1:-$DEFAULT_IMAGE}"
 HEALTH_URL="http://127.0.0.1:8080/api/health"
 

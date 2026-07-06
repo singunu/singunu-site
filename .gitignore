@@ -4,6 +4,7 @@
 !.env.example
 **/application-secret.yml
 **/application-local.yml
+*.pem
 
 # Node / Next.js
 node_modules/

@@ -17,7 +17,7 @@ on:
 
 env:
   # 👇 OWNER 를 저장소 소유자명(소문자)으로 교체
-  IMAGE: ghcr.io/OWNER/singunu-api
+  IMAGE: ghcr.io/singunu/singunu-api
 
 jobs:
   # 1) 테스트 — 실패하면 배포로 넘어가지 않는다
@@ -84,7 +84,7 @@ jobs:
           script: |
             # 서버에 미리 배치해 둔 배포 스크립트 실행 (infra/deploy.sh 참고)
             # 인자로 배포할 이미지 태그(커밋 SHA 7자리)를 넘긴다
-            bash /opt/singunu/deploy.sh ghcr.io/OWNER/singunu-api:${{ needs.build.outputs.image_tag }}
+            bash /opt/singunu/deploy.sh ghcr.io/singunu/singunu-api:${{ needs.build.outputs.image_tag }}
 
 # ── 필요한 GitHub Actions Secrets (Settings → Secrets and variables → Actions) ──
 #   SSH_HOST          : 서버 고정 IP (예: 13.125.x.x)

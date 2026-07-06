@@ -1,9 +1,9 @@
 # 🚀 배포 가이드 (Phase 4) — 신건우가 직접 하는 단계
 
 > 이 문서는 **🙋 사용자가 직접** 해야 하는 화면별 순서다. 코드·설정 파일(워크플로·Nginx·배포 스크립트)은 이미 만들어져 있으니(`infra/`, `.github/workflows/backend.yml`), 여기서는 계정·서버·DNS·시크릿만 채우면 된다.
->
+> 
 > **원칙**: 시크릿(키·비밀번호·URI)은 절대 git 에 커밋하지 않는다. 서버의 `/opt/singunu/.env` 와 GitHub Actions Secrets 에만 넣는다.
->
+> 
 > 전체 배포 구조: `Vercel(프론트)` + `Lightsail(백엔드 Docker)` + `MongoDB Atlas M0` + `GitHub Actions(CI/CD)`. 프론트는 `singunu.com`, API 는 `api.singunu.com`.
 
 배포 순서 한눈에: **① 서버 만들기 → ② 서버 세팅 → ③ DNS → ④ HTTPS 인증서 → ⑤ 시크릿 등록 → ⑥ 첫 배포 → ⑦ Vercel 프론트 → ⑧ 비용 알람 → ⑨ Atlas 보안 좁히기**
@@ -32,7 +32,7 @@
 
 *왜: 이미지를 실행할 런타임(Docker)과, HTTPS·SSE 프록시(Nginx)가 서버에 있어야 한다.*
 
-Lightsail 콘솔의 **Connect using SSH**(브라우저 터미널) 또는 로컬에서 `ssh -i default.pem ubuntu@<고정IP>` 로 접속 후:
+Lightsail 콘솔의 **Connect using SSH**(브라우저 터미널) 또는 로컬에서 `ssh -i default.pem ubuntu@3.34.233.28` 로 접속 후:
 
 ```bash
 # Docker + compose plugin 설치
@@ -45,17 +45,20 @@ sudo chown -R $USER:$USER /opt/singunu
 ```
 
 이 저장소의 `infra/deploy.sh` 를 서버 `/opt/singunu/deploy.sh` 로 올린다(로컬에서):
+
 ```bash
-scp -i default.pem infra/deploy.sh ubuntu@<고정IP>:/opt/singunu/deploy.sh
+scp -i default.pem infra/deploy.sh ubuntu@3.34.233.28:/opt/singunu/deploy.sh
 # (선택) 수동 compose 를 쓸 거면 docker-compose.prod.yml 도 함께
-scp -i default.pem infra/docker-compose.prod.yml ubuntu@<고정IP>:/opt/singunu/
+scp -i default.pem infra/docker-compose.prod.yml ubuntu@3.34.233.28:/opt/singunu/
 ```
 
 서버에서 실행 권한 + 운영 환경변수 파일 작성:
+
 ```bash
 chmod +x /opt/singunu/deploy.sh
 nano /opt/singunu/.env      # infra/.env.prod.example 내용을 붙여넣고 실제 값 입력
 ```
+
 `.env` 채울 값 (`infra/.env.prod.example` 참고):
 `ANTHROPIC_API_KEY`, `MONGODB_URI`(Atlas), `MAIL_USERNAME`, `MAIL_APP_PASSWORD`, `ADMIN_EMAIL`, `DAILY_BUDGET_USD`, `ALLOWED_ORIGIN=https://singunu.com`, `CLAUDE_MODEL`
 *(왜: 시크릿을 이미지에 굽지 않고 런타임 주입 → 유출·재빌드 위험 감소)*
@@ -63,6 +66,7 @@ nano /opt/singunu/.env      # infra/.env.prod.example 내용을 붙여넣고 실
 > **deploy.sh / compose / nginx.conf 안의 `OWNER` 를 본인 GitHub 소유자명(소문자)으로 바꾸는 것 잊지 말 것.**
 
 Nginx 설정 배치:
+
 ```bash
 scp -i default.pem infra/nginx.conf ubuntu@<고정IP>:/tmp/nginx.conf
 # 서버에서:
@@ -70,6 +74,7 @@ sudo mv /tmp/nginx.conf /etc/nginx/sites-available/api.singunu.com
 sudo ln -s /etc/nginx/sites-available/api.singunu.com /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default   # 기본 사이트 제거
 ```
+
 > ⚠️ 지금은 인증서가 없어 443 블록 때문에 `nginx -t` 가 실패한다. **④에서 certbot 발급 후** reload 한다. (급하면 443 `server{}` 블록을 잠시 주석 처리하고 80만 올린 뒤, 발급 후 되살려도 된다.)
 
 ---
@@ -80,11 +85,11 @@ sudo rm -f /etc/nginx/sites-enabled/default   # 기본 사이트 제거
 
 가비아 → **My가비아 → 도메인 → DNS 관리 → 레코드 수정**:
 
-| 타입 | 호스트 | 값 | 용도 |
-|---|---|---|---|
-| A | `api` | `<Lightsail 고정 IP>` | 백엔드 API 서버 |
-| A | `@` | `76.76.21.21` | Vercel 프론트 (⑦에서 Vercel 이 안내하는 최신 값으로 확인) |
-| CNAME | `www` | `cname.vercel-dns.com` | Vercel 프론트 |
+| 타입    | 호스트   | 값                      | 용도                                       |
+| ----- | ----- | ---------------------- | ---------------------------------------- |
+| A     | `api` | `<Lightsail 고정 IP>`    | 백엔드 API 서버                               |
+| A     | `@`   | `76.76.21.21`          | Vercel 프론트 (⑦에서 Vercel 이 안내하는 최신 값으로 확인) |
+| CNAME | `www` | `cname.vercel-dns.com` | Vercel 프론트                               |
 
 *(왜: `api` 만 우리 서버(A레코드), 나머지는 Vercel 이 관리. `@`·`www` 실제 값은 ⑦ Vercel 대시보드가 표시하는 값을 따른다 — 위 값은 일반적 예시)*
 전파 확인: `nslookup api.singunu.com` 이 고정 IP 로 나오면 OK (수 분~수십 분 소요).
@@ -96,15 +101,19 @@ sudo rm -f /etc/nginx/sites-enabled/default   # 기본 사이트 제거
 *왜: 브라우저가 API 를 HTTPS 로만 신뢰하고, 프론트(https)에서 http API 호출은 차단된다.*
 
 `api.singunu.com` DNS 가 서버로 전파된 뒤, 서버에서:
+
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d api.singunu.com --agree-tos -m singunu17@gmail.com --no-eff-email
 ```
+
 *(왜: `--nginx` 플러그인이 인증서를 받아 `nginx.conf` 의 443 경로에 자동 연결해 준다)*
 발급 후:
+
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
 ```
+
 갱신은 certbot 이 자동(타이머)으로 처리한다. 확인: 브라우저에서 `https://api.singunu.com/api/health` → `{"status":"ok"}` (아직 컨테이너 실행 전이면 502 — ⑥ 이후 정상).
 
 ---
@@ -115,17 +124,18 @@ sudo nginx -t && sudo systemctl reload nginx
 
 GitHub 저장소 → **Settings → Secrets and variables → Actions → New repository secret** 에 아래 등록:
 
-| Secret 이름 | 값 | 비고 |
-|---|---|---|
-| `SSH_HOST` | Lightsail 고정 IP | |
-| `SSH_USER` | `ubuntu` | Lightsail Ubuntu 기본 계정 |
-| `SSH_KEY` | 다운로드한 `.pem` **파일 전체 내용** | `-----BEGIN ... KEY-----` 부터 끝까지 그대로 |
+| Secret 이름  | 값                         | 비고                                   |
+| ---------- | ------------------------- | ------------------------------------ |
+| `SSH_HOST` | Lightsail 고정 IP           |                                      |
+| `SSH_USER` | `ubuntu`                  | Lightsail Ubuntu 기본 계정               |
+| `SSH_KEY`  | 다운로드한 `.pem` **파일 전체 내용** | `-----BEGIN ... KEY-----` 부터 끝까지 그대로 |
 
 > 나머지 시크릿(`ANTHROPIC_API_KEY`, `MONGODB_URI`, `MAIL_USERNAME`, `MAIL_APP_PASSWORD`, `ADMIN_EMAIL`)은 **서버 `/opt/singunu/.env`** 에 두므로 워크플로 동작엔 필수가 아니다. 백업·기록용으로 Secrets 에도 넣어두면 좋다.
 
 또한 `.github/workflows/backend.yml`, `infra/deploy.sh`, `infra/docker-compose.prod.yml`, `infra/nginx.conf` 안의 **`OWNER`** 를 본인 GitHub 소유자명(소문자)으로 교체 후 커밋.
 
 > GHCR 패키지 접근: 워크플로가 처음 push 하면 패키지가 **private** 으로 생긴다. 서버가 pull 하려면 두 가지 중 하나:
+> 
 > - (간단) GitHub → 패키지 → **Package settings → Change visibility → Public** *(왜: 이미지엔 시크릿을 안 굽으므로 public 이어도 안전 — 시크릿은 .env 런타임 주입)*
 > - (유지) 서버에서 `echo <읽기용 PAT> | docker login ghcr.io -u <사용자명> --password-stdin` 한 번 실행
 
@@ -137,6 +147,7 @@ GitHub 저장소 → **Settings → Secrets and variables → Actions → New re
 
 - `backend/` 나 `persona/` 를 수정해 `main` 에 push → **Actions** 탭에서 `test → build → deploy` 초록불 확인.
 - 또는 서버에서 수동으로 한 번:
+  
   ```bash
   # GHCR 이미지가 올라온 뒤
   bash /opt/singunu/deploy.sh ghcr.io/<소유자명>/singunu-api:latest
