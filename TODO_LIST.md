@@ -1,7 +1,7 @@
 # singunu.com — AI Q&A 홈페이지 TODO
 
 > 🙋 = 내가(신건우) 직접 해야 하는 일 · 🤖 = Claude Code가 자동 진행
-> 전체 계획: `docs/PLAN.md` 참조. 각 단계 완료 시 이 파일을 갱신한다.
+> 전체 계획: `docs/PLAN.md` · 파트별 에이전트 분리 운영: `docs/AGENTS.md`. 각 단계 완료 시 이 파일을 갱신한다.
 
 ## Phase 0 — 셋업
 
