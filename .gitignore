@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+**/application-secret.yml
+**/application-local.yml
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Java / Gradle
+backend/build/
+backend/.gradle/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
