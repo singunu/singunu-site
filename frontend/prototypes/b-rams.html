@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B안 — Rams · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* Dieter Rams / Braun 기능주의: 뉴트럴 그레이 + 시그널 오렌지 단일 포인트 */
+  :root {
+    --bg: #ececea; --panel: #f7f7f5; --ink: #1d1d1b; --dim: #75756f;
+    --line: #d8d8d4; --orange: #e8541e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+  }
+
+  header {
+    padding: 16px 22px; display: flex; align-items: baseline; gap: 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+  header .logo { font-weight: 800; font-size: 15px; letter-spacing: .02em; }
+  header .logo::after { content: "●"; color: var(--orange); margin-left: 6px; font-size: 10px; vertical-align: 2px; }
+  header nav { margin-left: auto; font-size: 12px; color: var(--dim); }
+
+  .hero { max-width: 620px; margin: 0 auto; width: 100%; padding: 52px 22px 24px; }
+  .hero .index { font-size: 12px; color: var(--dim); letter-spacing: .12em; margin-bottom: 16px; }
+  .hero .index b { color: var(--orange); font-weight: 700; }
+  .hero h1 { font-size: clamp(28px, 6.5vw, 42px); font-weight: 800; letter-spacing: -.035em; line-height: 1.2; }
+  .hero p { margin-top: 16px; font-size: 15px; line-height: 1.75; color: #44443f; max-width: 46ch; }
+  .hero .rule { margin-top: 28px; height: 1px; background: var(--line); position: relative; }
+  .hero .rule::before { content: ""; position: absolute; left: 0; top: -1px; width: 56px; height: 3px; background: var(--orange); }
+
+  .chat { flex: 1; max-width: 620px; margin: 0 auto; width: 100%; padding: 10px 22px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+  .chip {
+    padding: 10px 16px; border: 1px solid var(--ink); border-radius: 2px;
+    background: transparent; font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all .12s;
+  }
+  .chip:hover { background: var(--ink); color: var(--panel); }
+
+  .msg { margin: 18px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 84%; padding: 14px 18px; font-size: 15px; line-height: 1.7; letter-spacing: -.01em; }
+  .msg.ai .bubble { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; border-left: 3px solid var(--orange); }
+  .msg.user .bubble { background: var(--ink); color: var(--panel); border-radius: 2px; }
+  .msg.ai .label { font-size: 11px; letter-spacing: .1em; color: var(--dim); margin-bottom: 7px; font-weight: 600; }
+
+  .typing { display: inline-flex; gap: 4px; }
+  .typing i { width: 5px; height: 5px; background: var(--orange); border-radius: 50%; animation: t 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes t { 0%,60%,100% { opacity: .25 } 30% { opacity: 1 } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 22px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 40%);
+  }
+  .inputbar .box {
+    max-width: 576px; margin: 0 auto; display: flex;
+    background: var(--panel); border: 1px solid var(--ink); border-radius: 2px;
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; padding: 15px 18px; color: var(--ink); }
+  .inputbar input::placeholder { color: #a3a39c; }
+  .send { border: none; background: var(--orange); color: #fff; width: 54px; font-size: 18px; cursor: pointer; }
+  .hint { max-width: 576px; margin: 8px auto 0; font-size: 11px; color: var(--dim); text-align: center; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">SINGUNU</div>
+    <nav>digital twin · v1</nav>
+  </header>
+
+  <div class="hero">
+    <div class="index"><b>01</b> — GOOD QUESTION IS BETTER THAN GOOD ANSWER</div>
+    <h1>신건우에 대해<br>물어보세요.</h1>
+    <p>데이터로 문제를 구조화하고, 반복을 시스템으로 굳혀 결정피로를 없애는
+    AI 데이터 PM입니다. 이 AI는 제가 검수한 정보만 말하고, 모르는 질문은
+    저에게 직접 전달합니다 — 덜 그럴듯하게, 더 정확하게.</p>
+    <div class="rule"></div>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">경력이 궁금해요</button>
+      <button class="chip">영화 취향은?</button>
+      <button class="chip">디터 람스를 좋아한다던데</button>
+      <button class="chip">지금 뭐 준비 중?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">디터 람스를 좋아한다던데</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">네, "Less, but better"를 삶의 기준으로도 씁니다.
+        브라운 면도기 하나를 6~7년째 쓰고 있어요. 물건이든 프로세스든,
+        빼도 되는 걸 빼고 나면 남는 것이 본질이라고 생각합니다.</div>
+      </div>
+    </div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="무엇이든 물어보세요" />
+      <button class="send">→</button>
+    </div>
+    <div class="hint">AI가 답하기 어려운 질문은 건우에게 직접 전달돼요</div>
+  </div>
+</body>
+</html>

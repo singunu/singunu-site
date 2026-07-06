@@ -241,7 +241,7 @@ public class ChatService {
         }
     }
 
-    static String sha256(String value) {
+    public static String sha256(String value) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8))).substring(0, 16);

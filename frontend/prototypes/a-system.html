@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A안 — System · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #0c0e12; --surface: #14171d; --surface-2: #1b1f27;
+    --line: #262b35; --text: #e8eaf0; --dim: #8b93a3;
+    --accent: #5eead4; --accent-dim: rgba(94,234,212,.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100dvh; display: flex; flex-direction: column;
+  }
+  .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  header {
+    padding: 14px 20px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(12,14,18,.8); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  header .title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+  .hero { padding: 48px 20px 28px; max-width: 640px; margin: 0 auto; width: 100%; }
+  .hero .boot { font-size: 12px; color: var(--dim); margin-bottom: 18px; line-height: 1.9; }
+  .hero .boot .ok { color: var(--accent); }
+  .hero h1 { font-size: clamp(26px, 6vw, 38px); font-weight: 800; letter-spacing: -.03em; line-height: 1.25; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { margin-top: 14px; color: var(--dim); font-size: 15px; line-height: 1.7; }
+
+  .chat { flex: 1; max-width: 640px; margin: 0 auto; width: 100%; padding: 8px 20px 140px; }
+  .msg { display: flex; margin: 14px 0; }
+  .msg.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%; padding: 12px 16px; border-radius: 16px;
+    font-size: 15px; line-height: 1.65; letter-spacing: -.01em;
+  }
+  .msg.ai .bubble { background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg.user .bubble { background: var(--accent-dim); color: #d7fff6; border: 1px solid rgba(94,234,212,.25); border-bottom-right-radius: 4px; }
+  .msg.ai .label { font-size: 11px; color: var(--dim); margin-bottom: 6px; }
+  .cursor { display: inline-block; width: 8px; height: 15px; background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .chip {
+    padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--dim); font-size: 13px; cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 30%);
+  }
+  .inputbar .box {
+    max-width: 600px; margin: 0 auto; display: flex; gap: 8px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 16px; padding: 6px 6px 6px 18px; align-items: center;
+  }
+  .inputbar input { flex: 1; background: none; border: none; outline: none; color: var(--text); font: inherit; font-size: 15px; padding: 10px 0; }
+  .inputbar input::placeholder { color: #565e6e; }
+  .send {
+    width: 40px; height: 40px; border-radius: 12px; border: none;
+    background: var(--accent); color: #052e26; font-size: 17px; cursor: pointer;
+  }
+  footer { position: fixed; bottom: 84px; right: 16px; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="dot"></div>
+    <div class="title">AI 신건우</div>
+    <div class="status mono">uptime 99.9% · powered by claude</div>
+  </header>
+
+  <div class="hero">
+    <div class="boot mono">
+      &gt; persona.load() <span class="ok">✓ ok</span><br>
+      &gt; guardrails.init(5_layers) <span class="ok">✓ ok</span><br>
+      &gt; ready.
+    </div>
+    <h1>신경 쓸 것을 없애고<br>중요한 일에 몰두하는, <em>의미를 좇는 시스템 설계자</em></h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈입니다. 저에 대해 무엇이든 물어보세요.
+    모르는 건 지어내지 않고 — 본체가 직접 답하러 옵니다.</p>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">어떤 일을 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일을 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.
+        반복을 자동화해서 사람이 더 중요한 판단에 집중하게 만드는 게 제 일이었죠.<span class="cursor"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+</body>
+</html>

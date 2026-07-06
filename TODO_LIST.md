@@ -18,18 +18,22 @@
 - [x] 🙋 **공개 범위 최종 검수** — `persona/public_persona.md`를 읽고 빼고 싶은 내용 삭제/수정 (반드시 사람이!)
 - [x] 🤖 검수 반영 후 확정본 동결
 
-## Phase 2 — 백엔드 (Spring Boot 3, Java 21)
+## Phase 2 — 백엔드 (Spring Boot 3, Java 17*)
 
-- [ ] 🤖 프로젝트 스캐폴드 + `/api/chat` (SSE 스트리밍, Claude API 연동)
-- [ ] 🤖 가드레일 5레이어 (입력필터 → 시스템프롬프트 → 출력검열 → 확신도 라우팅 → 레이트리밋/지출상한)
-- [ ] 🤖 `/api/fallback` (질문+대화이력+연락처 저장 + 메일 발송)
-- [ ] 🤖 MongoDB 연동, 테스트 코드, docker-compose(로컬 개발용)
-- [ ] 🙋 MongoDB Atlas M0 무료 클러스터 생성 → 접속 URI 전달 (가이드: `docs/SETUP_GUIDE.md`)
+> *로컬에 JDK 17이 설치되어 있어 21 대신 17(LTS)로 맞춤 — Spring Boot 3 완전 호환
+
+- [x] 🤖 프로젝트 스캐폴드 + `/api/chat` (SSE 스트리밍, Claude API 연동, 프롬프트 캐싱)
+- [x] 🤖 가드레일 5레이어 (입력필터 → 시스템프롬프트 → 출력검열 → 확신도 라우팅 → 레이트리밋/지출상한)
+- [x] 🤖 `/api/fallback` (질문+대화이력+연락처 저장 + 메일 발송 + 허니팟)
+- [x] 🤖 MongoDB 연동, 단위 테스트, Dockerfile, docker-compose(로컬 개발용)
+- [x] 🤖 Docker 컨테이너에서 빌드·테스트 통과 확인 (BUILD SUCCESSFUL)
+- [ ] 🙋 `backend/.env`의 `ANTHROPIC_API_KEY=` 자리에 발급받은 키 붙여넣기
+- [ ] 🙋 MongoDB Atlas M0 무료 클러스터 생성 → 접속 URI 전달 (가이드: `docs/SETUP_GUIDE.md`) — 로컬 개발은 docker compose의 Mongo로 충분, 배포 전까지만 하면 됨
 - [x] 🙋 Gmail 앱 비밀번호 발급 → `backend/.env`로 이동 완료 (⚠️ 비밀번호·키는 이 파일이 아니라 .env에만 — 이 파일은 GitHub에 올라감)
 
 ## Phase 3 — 프론트엔드 (Next.js + Vercel)
 
-- [ ] 🤖 디자인 프로토타입 2~3안 (HTML) 제작
+- [x] 🤖 디자인 프로토타입 3안 (HTML) 제작 — `frontend/prototypes/` (a-system: 다크 터미널 / b-rams: 디터람스 미니멀 / c-editorial: 지면 에디토리얼) — 브라우저로 열어서 확인
 - [ ] 🙋 디자인 시안 선택 + 피드백
 - [ ] 🤖 Next.js 구현: 챗 UI(스트리밍), 추천 질문 칩, 폴백 모달, 다크/라이트, OG/SEO
 - [ ] 🙋 히어로 문구·추천 질문·프로필 사진(선택) 확정

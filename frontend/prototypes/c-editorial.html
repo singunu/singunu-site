@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C안 — Editorial · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&display=swap" rel="stylesheet">
+<style>
+  /* 철학책 읽는 PM — 지면(紙面) 위의 대화. 잉크 블루 포인트 */
+  :root {
+    --paper: #faf8f3; --ink: #22242a; --dim: #8a8a82;
+    --line: #e2ded4; --blue: #2440c9; --highlight: #f4edda;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--paper); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+  }
+  .serif { font-family: "Noto Serif KR", serif; }
+
+  header {
+    padding: 18px 22px; text-align: center; border-bottom: 1px solid var(--line);
+  }
+  header .masthead { font-family: "Noto Serif KR", serif; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+  header .sub { font-size: 10px; color: var(--dim); letter-spacing: .2em; margin-top: 4px; }
+
+  .hero { max-width: 600px; margin: 0 auto; width: 100%; padding: 48px 22px 20px; text-align: center; }
+  .hero .kicker { font-size: 12px; color: var(--blue); letter-spacing: .18em; font-weight: 600; }
+  .hero h1 {
+    font-family: "Noto Serif KR", serif; font-weight: 900;
+    font-size: clamp(30px, 7vw, 44px); line-height: 1.35; letter-spacing: -.01em;
+    margin-top: 14px;
+  }
+  .hero h1 mark { background: linear-gradient(transparent 62%, var(--highlight) 62%); color: inherit; }
+  .hero p { margin: 18px auto 0; font-size: 14.5px; line-height: 1.85; color: #55554e; max-width: 42ch; }
+  .hero .ornament { margin-top: 26px; color: var(--dim); font-size: 13px; letter-spacing: .5em; }
+
+  .chat { flex: 1; max-width: 600px; margin: 0 auto; width: 100%; padding: 6px 22px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 28px; }
+  .chip {
+    padding: 9px 15px; border: 1px solid var(--line); border-radius: 999px;
+    background: #fff; font-size: 13px; color: #55554e; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { border-color: var(--blue); color: var(--blue); }
+
+  .msg { margin: 22px 0; }
+  .msg.user { text-align: right; }
+  .msg.user .bubble {
+    display: inline-block; background: var(--ink); color: var(--paper);
+    padding: 12px 18px; border-radius: 18px 18px 4px 18px;
+    font-size: 15px; line-height: 1.65; max-width: 84%; text-align: left;
+  }
+  .msg.ai .speaker {
+    font-family: "Noto Serif KR", serif; font-size: 12px; font-weight: 600;
+    color: var(--blue); letter-spacing: .1em; margin-bottom: 8px;
+  }
+  .msg.ai .bubble {
+    font-family: "Noto Serif KR", serif; font-size: 15.5px; line-height: 1.95;
+    border-left: 2px solid var(--blue); padding: 2px 0 2px 18px; max-width: 90%;
+  }
+  .footnote { font-size: 11px; color: var(--dim); margin-top: 10px; padding-left: 20px; }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 22px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--paper) 40%);
+  }
+  .inputbar .box {
+    max-width: 556px; margin: 0 auto; display: flex; align-items: center;
+    background: #fff; border: 1px solid var(--ink); border-radius: 999px; padding: 4px 4px 4px 20px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .inputbar input { flex: 1; border: none; outline: none; font: inherit; font-size: 15px; padding: 12px 0; background: none; }
+  .inputbar input::placeholder { color: #b5b5ac; }
+  .send {
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: var(--blue); color: #fff; font-size: 16px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="masthead">신 건 우</div>
+    <div class="sub">DIGITAL TWIN · EST. 2026</div>
+  </header>
+
+  <div class="hero">
+    <div class="kicker">묻고, 답하다</div>
+    <h1>"모든 것에는<br><mark>의미가 있다</mark>"</h1>
+    <p>철학책 읽는 데이터 PM, 신건우의 디지털 트윈입니다.
+    일과 취향과 생각에 대해 물어보세요. 이 AI가 답하기 어려운 질문은
+    본인이 직접 답장을 보냅니다.</p>
+    <div class="ornament">· · ·</div>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">인생 책이 뭐예요?</button>
+      <button class="chip">무슨 일 하세요?</button>
+      <button class="chip">글은 왜 쓰세요?</button>
+      <button class="chip">러닝은 왜 하세요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">인생 책이 뭐예요?</div></div>
+    <div class="msg ai">
+      <div class="speaker">건우 曰</div>
+      <div class="bubble">니체의 『차라투스트라는 이렇게 말했다』, 헤세의 『싯다르타』,
+      그리고 이상의 『권태』에 만점을 줬습니다. 셋 다 "어떻게 살 것인가"를
+      다른 각도에서 묻는 책이에요. 독후감을 쓰고 나면 책은 처분합니다 —
+      남기는 건 책이 아니라 앎이면 충분해서요.</div>
+      <div class="footnote">* 90권의 독서 기록에서 검증된 답변입니다</div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="신건우에게 묻기..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+</body>
+</html>
