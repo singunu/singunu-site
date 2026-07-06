@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: singunu-api
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/singunu}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8080
+
+app:
+  anthropic-api-key: ${ANTHROPIC_API_KEY:}
+  model: ${CLAUDE_MODEL:claude-haiku-4-5}
+  max-output-tokens: 1024
+  persona-path: ${PERSONA_PATH:../persona/public_persona.md}
+  admin-email: ${ADMIN_EMAIL:singunu17@gmail.com}
+  daily-budget-usd: ${DAILY_BUDGET_USD:1.0}
+  allowed-origin: ${ALLOWED_ORIGIN:http://localhost:3000}
+  rate-limit-per-minute: 10
+  rate-limit-per-day: 100
+  max-message-length: 500
+  max-history-turns: 20
+
+logging:
+  level:
+    com.singunu.api: INFO

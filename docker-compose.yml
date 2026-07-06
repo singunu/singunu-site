@@ -1,0 +1,25 @@
+# 로컬 개발용: docker compose up --build
+# 시크릿은 backend/.env 에서 로드 (gitignore됨)
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - backend/.env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/singunu
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
