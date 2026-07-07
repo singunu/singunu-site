@@ -68,7 +68,7 @@ nano /opt/singunu/.env      # infra/.env.prod.example 내용을 붙여넣고 실
 Nginx 설정 배치:
 
 ```bash
-scp -i default.pem infra/nginx.conf ubuntu@<고정IP>:/tmp/nginx.conf
+scp -i default.pem infra/nginx.conf ubuntu@3.34.233.28:/tmp/nginx.conf
 # 서버에서:
 sudo mv /tmp/nginx.conf /etc/nginx/sites-available/api.singunu.com
 sudo ln -s /etc/nginx/sites-available/api.singunu.com /etc/nginx/sites-enabled/

@@ -11,6 +11,18 @@ import { streamChat, getSessionId, type Turn } from '@/lib/api';
 
 const CHIPS = ['어떤 일 하셨어요?', '인생 영화 3편만요', 'MBTI가 뭐예요?', '요즘 목표는요?'];
 
+/* 답변에 남은 마크다운 토큰 제거 — 프롬프트 규칙("마크다운 금지")의 2차 방어.
+   누적 텍스트에 렌더 직전 적용하므로 스트리밍 delta 경계에 마커가 걸쳐도 안전.
+   과잉 변환 금지: 볼드/코드 마커와 행머리 헤더·리스트 마커만 걷어낸다. */
+function stripMarkdown(t: string): string {
+  return t
+    .replace(/\*\*|__/g, '') // 볼드 마커 (미완성 쌍 포함)
+    .replace(/`+/g, '') // 인라인·블록 코드 마커
+    .replace(/^#{1,6}\s+/gm, '') // 헤더
+    .replace(/^\s*[-*•]\s+/gm, '') // 리스트 마커
+    .replace(/^\s*\d{1,2}\.\s+/gm, ''); // 번호 리스트 마커
+}
+
 interface Msg extends Turn {
   pending?: boolean; // 아직 델타가 도착하지 않은 답변 자리
 }
@@ -194,7 +206,7 @@ export default function ChatApp() {
                   {m.pending ? (
                     <span className="typing"><i /><i /><i /></span>
                   ) : (
-                    m.text
+                    stripMarkdown(m.text)
                   )}
                 </div>
               </div>
