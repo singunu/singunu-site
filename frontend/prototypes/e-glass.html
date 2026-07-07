@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E안 — Glass · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 글래스모피즘: 그라디언트 메시 배경 + 반투명 블러 카드 — 2025~26 AI 프로덕트 톤 */
+  :root {
+    --ink: #1a1c2e; --dim: #6b6f8a; --line: rgba(255,255,255,.5);
+    --violet: #7c6cf6; --teal: #34d1c5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    color: var(--ink); min-height: 100dvh; display: flex; flex-direction: column;
+    background: #eef0fb;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(124,108,246,.35), transparent 45%),
+      radial-gradient(circle at 85% 18%, rgba(52,209,197,.30), transparent 45%),
+      radial-gradient(circle at 30% 85%, rgba(255,138,196,.25), transparent 45%);
+    background-attachment: fixed;
+  }
+  .glass {
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--line);
+  }
+
+  header {
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header .orb {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--teal));
+  }
+  header .title { font-weight: 700; font-size: 14.5px; letter-spacing: -.01em; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+  .hero { max-width: 640px; margin: 0 auto; width: 100%; padding: 48px 20px 24px; text-align: center; }
+  .hero .pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 20px;
+  }
+  .hero .pill::before { content: "✦"; color: var(--violet); }
+  .hero h1 { font-size: clamp(27px, 6.5vw, 40px); font-weight: 800; letter-spacing: -.03em; line-height: 1.3; }
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--violet), var(--teal));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { margin: 16px auto 0; font-size: 14.5px; line-height: 1.8; color: var(--dim); max-width: 44ch; }
+
+  .chat { flex: 1; max-width: 640px; margin: 0 auto; width: 100%; padding: 8px 20px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin: 22px 0; }
+  .chip {
+    padding: 10px 15px; border-radius: 999px; font-size: 13px; color: var(--ink);
+    cursor: pointer; transition: transform .15s;
+  }
+  .chip:hover { transform: translateY(-2px); border-color: var(--violet); }
+
+  .msg { margin: 16px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 13px 17px; border-radius: 18px; font-size: 15px; line-height: 1.65; }
+  .msg.ai .bubble { border-bottom-left-radius: 4px; }
+  .msg.user .bubble {
+    background: linear-gradient(135deg, var(--violet), var(--teal)); color: #fff;
+    border-bottom-right-radius: 4px; border: none;
+  }
+  .msg.ai .label {
+    font-size: 11px; font-weight: 700; margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--violet), var(--teal));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .cursor {
+    display: inline-block; width: 7px; height: 14px; vertical-align: -2px;
+    background: var(--violet); animation: blink 1s steps(1) infinite; border-radius: 2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  }
+  .inputbar .box {
+    max-width: 600px; margin: 0 auto; display: flex; gap: 6px; align-items: center;
+    border-radius: 22px; padding: 6px 6px 6px 20px;
+    box-shadow: 0 8px 30px rgba(90,80,180,.15);
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #9a9db3; }
+  .send {
+    width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--teal));
+  }
+</style>
+</head>
+<body>
+  <header class="glass">
+    <div class="orb"></div>
+    <div class="title">AI 신건우</div>
+    <div class="status">Claude 기반 · 실시간 스트리밍</div>
+  </header>
+
+  <div class="hero">
+    <div class="pill glass">디지털 트윈 · 신건우</div>
+    <h1>궁금한 걸 물어보면<br><span>진짜 신건우처럼</span> 답해요</h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈입니다. 모르는 건 지어내지 않고,
+    본체가 직접 답하러 옵니다.</p>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip glass">어떤 일을 하셨어요?</button>
+      <button class="chip glass">인생 영화 3편만요</button>
+      <button class="chip glass">MBTI가 뭐예요?</button>
+      <button class="chip glass">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일을 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble glass">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.
+        반복을 자동화해서 사람이 더 중요한 판단에 집중하게 만드는 게 제 일이었죠.<span class="cursor"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box glass">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+</body>
+</html>

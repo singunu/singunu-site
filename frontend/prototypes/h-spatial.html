@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H안 — Spatial 3D · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 2026 트렌드: Spatial UI + 실제 WebGL 3D — 깊이 레이어 위에 떠 있는 대화.
+     배경은 Three.js 와이어프레임 오브젝트가 마우스에 반응하며 회전. */
+  :root {
+    --bg: #07090f; --ink: #eef1f8; --dim: #7d879c;
+    --line: rgba(140,160,200,.16); --glow: #6d8dff; --glow2: #34d1c5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden;
+  }
+  #scene { position: fixed; inset: 0; z-index: 0; }
+  .depth { position: relative; z-index: 1; }
+
+  header {
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(7,9,15,.55); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  header .cube {
+    width: 14px; height: 14px; border: 1.5px solid var(--glow);
+    transform: rotate(45deg); animation: spin 7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(405deg); } }
+  header .title { font-weight: 700; font-size: 14px; letter-spacing: -.01em; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+  .hero { max-width: 640px; margin: 0 auto; width: 100%; padding: 56px 20px 20px; perspective: 900px; }
+  .hero .layer { transform-style: preserve-3d; transition: transform .2s ease-out; }
+  .hero .kicker {
+    font-size: 12px; color: var(--glow2); letter-spacing: .22em; font-weight: 700; margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 6.8vw, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1.22;
+    text-shadow: 0 0 40px rgba(109,141,255,.35);
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(120deg, var(--glow), var(--glow2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { margin-top: 16px; font-size: 15px; line-height: 1.8; color: var(--dim); max-width: 46ch; }
+
+  .chat { flex: 1; max-width: 640px; margin: 0 auto; width: 100%; padding: 10px 20px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin: 24px 0; }
+  .chip {
+    padding: 10px 15px; border-radius: 12px; border: 1px solid var(--line);
+    background: rgba(20,26,40,.6); backdrop-filter: blur(8px);
+    color: var(--dim); font-size: 13px; cursor: pointer;
+    transition: transform .18s, border-color .18s, color .18s, box-shadow .18s;
+  }
+  .chip:hover {
+    transform: translateY(-3px); color: var(--ink); border-color: var(--glow);
+    box-shadow: 0 12px 30px rgba(109,141,255,.25);
+  }
+
+  .msg { margin: 18px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%; padding: 13px 17px; border-radius: 16px;
+    font-size: 15px; line-height: 1.7;
+  }
+  .msg.ai .bubble {
+    background: rgba(18,23,36,.7); backdrop-filter: blur(12px);
+    border: 1px solid var(--line); border-bottom-left-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(160,180,230,.12);
+  }
+  .msg.user .bubble {
+    background: linear-gradient(120deg, rgba(109,141,255,.28), rgba(52,209,197,.22));
+    border: 1px solid rgba(109,141,255,.4); color: #dfe7ff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 14px 36px rgba(50,80,200,.3);
+  }
+  .msg.ai .label { font-size: 11px; color: var(--glow2); font-weight: 700; margin-bottom: 6px; letter-spacing: .06em; }
+  .cursor { display: inline-block; width: 8px; height: 15px; background: var(--glow2); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 55%);
+  }
+  .inputbar .box {
+    max-width: 600px; margin: 0 auto; display: flex; gap: 8px; align-items: center;
+    background: rgba(18,23,36,.85); backdrop-filter: blur(16px);
+    border: 1px solid var(--line); border-radius: 16px; padding: 6px 6px 6px 18px;
+    box-shadow: 0 -6px 40px rgba(109,141,255,.12), 0 18px 44px rgba(0,0,0,.5);
+  }
+  .inputbar input { flex: 1; background: none; border: none; outline: none; color: var(--ink); font: inherit; font-size: 15px; padding: 11px 0; }
+  .inputbar input::placeholder { color: #4d5568; }
+  .send {
+    width: 42px; height: 42px; border-radius: 12px; border: none; cursor: pointer; font-size: 16px; color: #061018;
+    background: linear-gradient(135deg, var(--glow), var(--glow2));
+    box-shadow: 0 6px 20px rgba(109,141,255,.4);
+  }
+</style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <header class="depth">
+    <div class="cube"></div>
+    <div class="title">AI 신건우</div>
+    <div class="status">spatial · webgl</div>
+  </header>
+
+  <div class="hero depth">
+    <div class="layer" id="heroLayer">
+      <div class="kicker">DIGITAL TWIN · DEPTH 03</div>
+      <h1>표면 아래에 있는<br><em>신건우의 생각</em>까지 물어보세요</h1>
+      <p>AI 데이터 PM 신건우의 디지털 트윈입니다. 검수된 페르소나로만 답하고,
+      모르는 건 지어내지 않습니다 — 본체가 직접 답하러 옵니다.</p>
+    </div>
+  </div>
+
+  <main class="chat depth">
+    <div class="chips">
+      <button class="chip">어떤 일을 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일을 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.
+        반복을 자동화해서 사람이 더 중요한 판단에 집중하게 만드는 게 제 일이었죠.<span class="cursor"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.148.0/three.min.js"></script>
+<script>
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('scene');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, 1, .1, 100);
+  camera.position.z = 7;
+
+  // 와이어프레임 이코사헤드론 — 경량 3D 오브젝트 (2026: lightweight progressive 3D)
+  var geo = new THREE.IcosahedronGeometry(2.6, 1);
+  var wire = new THREE.LineSegments(
+    new THREE.WireframeGeometry(geo),
+    new THREE.LineBasicMaterial({ color: 0x6d8dff, transparent: true, opacity: .34 })
+  );
+  scene.add(wire);
+  var inner = new THREE.LineSegments(
+    new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.4, 0)),
+    new THREE.LineBasicMaterial({ color: 0x34d1c5, transparent: true, opacity: .4 })
+  );
+  scene.add(inner);
+
+  // 깊이감용 파티클 필드
+  var pts = [];
+  for (var i = 0; i < 260; i++) {
+    pts.push((Math.random() - .5) * 22, (Math.random() - .5) * 14, (Math.random() - .5) * 12);
+  }
+  var pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0x8ca0c8, size: .035, transparent: true, opacity: .7 })));
+
+  var mx = 0, my = 0;
+  window.addEventListener('pointermove', function (e) {
+    mx = (e.clientX / window.innerWidth - .5) * 2;
+    my = (e.clientY / window.innerHeight - .5) * 2;
+    var hero = document.getElementById('heroLayer');
+    if (hero && !reduced) {
+      hero.style.transform = 'rotateY(' + (mx * 3) + 'deg) rotateX(' + (-my * 2) + 'deg)';
+    }
+  });
+
+  function resize() {
+    var w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  var t = 0;
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (!reduced) {
+      t += .0035;
+      wire.rotation.y = t; wire.rotation.x = t * .45;
+      inner.rotation.y = -t * 1.4; inner.rotation.z = t * .6;
+      camera.position.x += (mx * 1.1 - camera.position.x) * .04;
+      camera.position.y += (-my * .7 - camera.position.y) * .04;
+      camera.lookAt(0, 0, 0);
+    }
+    renderer.render(scene, camera);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F안 — Calm AI · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 2026 트렌드: Calm Interface + 투명한 AI(능력 고지·확신도 표시) + 접근성 우선.
+     화려한 장식 대신 여백·저채도·명료한 상태 신호로 신뢰를 준다. */
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #2b2a26; --dim: #8a877d;
+    --line: #e8e6de; --sage: #6b8f71; --clay: #c47a5a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+    letter-spacing: -.005em;
+  }
+
+  header {
+    padding: 16px 22px; display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 10; background: rgba(246,245,241,.85);
+    backdrop-filter: blur(10px);
+  }
+  header .breathe {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--sage);
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
+  header .title { font-weight: 600; font-size: 14px; }
+  header .a11y {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--dim); border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 10px; cursor: pointer;
+  }
+
+  .hero { max-width: 600px; margin: 0 auto; width: 100%; padding: 52px 22px 8px; }
+  .hero h1 { font-size: clamp(24px, 5.6vw, 34px); font-weight: 600; letter-spacing: -.02em; line-height: 1.45; }
+  .hero p { margin-top: 14px; font-size: 14.5px; line-height: 1.85; color: var(--dim); max-width: 46ch; }
+
+  .capability {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 24px;
+    padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  }
+  .capability .row { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+  .capability .row.can b { color: var(--sage); font-weight: 700; }
+  .capability .row.cant b { color: var(--clay); font-weight: 700; }
+  .capability .row span.txt { color: var(--dim); }
+
+  .chat { flex: 1; max-width: 600px; margin: 0 auto; width: 100%; padding: 6px 22px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
+  .chip {
+    padding: 10px 15px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--panel); font-size: 13px; color: var(--ink); cursor: pointer;
+    transition: border-color .15s, transform .15s;
+  }
+  .chip:hover { border-color: var(--sage); transform: translateY(-1px); }
+
+  .msg { margin: 20px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 15px; line-height: 1.75; }
+  .msg.ai .bubble { background: var(--panel); border: 1px solid var(--line); }
+  .msg.user .bubble { background: var(--ink); color: var(--bg); }
+  .msg.ai .meta { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .msg.ai .label { font-size: 11.5px; color: var(--dim); font-weight: 600; }
+  .confidence {
+    font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    background: rgba(107,143,113,.12); color: var(--sage);
+  }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 22px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 42%);
+  }
+  .inputbar .box {
+    max-width: 576px; margin: 0 auto; display: flex; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 5px 5px 5px 18px;
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #b3b0a5; }
+  .send { width: 40px; height: 40px; border-radius: 11px; border: none; background: var(--sage); color: #fff; font-size: 16px; cursor: pointer; }
+  .hint { max-width: 576px; margin: 9px auto 0; font-size: 11px; color: var(--dim); text-align: center; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="breathe"></div>
+    <div class="title">AI 신건우 · 답변 중</div>
+    <div class="a11y">⚙ 모션 줄이기</div>
+  </header>
+
+  <div class="hero">
+    <h1>천천히, 정확하게<br>신건우에 대해 답합니다.</h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈입니다. 확신 없는 건 확신 없다고 말하고,
+    본체가 직접 답할 질문은 그렇게 전달합니다.</p>
+
+    <div class="capability">
+      <div class="row can"><b>✓</b><span class="txt">경력·취향·생각·일하는 방식에 답해요</span></div>
+      <div class="row cant"><b>✕</b><span class="txt">연락처·재정 등 민감정보는 답하지 않아요</span></div>
+    </div>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">어떤 일을 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일을 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="meta">
+          <div class="label">AI 건우</div>
+          <div class="confidence">확신 높음</div>
+        </div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+    <div class="hint">모든 답변엔 확신도가 표시돼요 · 낮으면 건우에게 직접 전달돼요</div>
+  </div>
+</body>
+</html>

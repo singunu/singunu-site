@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J안 — Liquid Glass · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 2026 트렌드: Liquid Glass(글래스모피즘 2.0) — 굴절·광원·깊이가 콘텐츠에 반응.
+     마우스를 따라가는 스페큘러 하이라이트 + 3D 유리 오브(orb) + 패럴랙스 레이어. */
+  :root {
+    --ink: #10131f; --dim: #5c6378;
+    --edge: rgba(255,255,255,.65); --edge-dark: rgba(120,140,190,.25);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    color: var(--ink); min-height: 100dvh; display: flex; flex-direction: column;
+    background: #dfe4f5;
+    overflow-x: hidden;
+  }
+  /* 유동하는 배경 컬러 필드 — 유리가 굴절시킬 "뒤편의 빛" */
+  .field { position: fixed; inset: -20%; z-index: 0; filter: blur(70px); }
+  .field i { position: absolute; border-radius: 50%; opacity: .55; }
+  .field .f1 { width: 46vw; height: 46vw; background: #7c9cff; top: 4%; left: 6%; animation: drift1 17s ease-in-out infinite alternate; }
+  .field .f2 { width: 40vw; height: 40vw; background: #ff9ec6; top: 42%; right: 4%; animation: drift2 21s ease-in-out infinite alternate; }
+  .field .f3 { width: 34vw; height: 34vw; background: #7fe3d2; bottom: 2%; left: 24%; animation: drift3 19s ease-in-out infinite alternate; }
+  @keyframes drift1 { to { transform: translate(9vw, 11vh) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate(-11vw, -7vh) scale(.9); } }
+  @keyframes drift3 { to { transform: translate(6vw, -9vh) scale(1.1); } }
+  .depth { position: relative; z-index: 1; }
+
+  /* 리퀴드 글래스 공통: 블러+채도 + 상단 에지 하이라이트 + 하단 에지 음영(굴절 느낌) */
+  .liquid {
+    background: linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.22));
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    border-radius: 22px;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1.5px 0 var(--edge),
+      inset 0 -1px 0 var(--edge-dark),
+      0 18px 44px -14px rgba(60,80,150,.35);
+    position: relative; overflow: hidden;
+  }
+  /* 마우스 추적 스페큘러 하이라이트 */
+  .liquid::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(220px circle at var(--sx, 50%) var(--sy, 0%), rgba(255,255,255,.55), transparent 65%);
+    opacity: .8;
+  }
+
+  header { padding: 14px 20px; display: flex; align-items: center; gap: 11px; position: sticky; top: 0; z-index: 10; }
+  header .bar { display: flex; align-items: center; gap: 11px; width: 100%; max-width: 640px; margin: 0 auto; padding: 10px 16px; border-radius: 16px; }
+  header .title { font-weight: 700; font-size: 14px; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); }
+
+  /* 3D 유리 오브 — CSS만으로 굴절 구체 */
+  .orb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.15) 26%, transparent 40%),
+      radial-gradient(circle at 68% 78%, rgba(124,156,255,.7), transparent 55%),
+      linear-gradient(140deg, rgba(255,158,198,.7), rgba(127,227,210,.7));
+    box-shadow: inset 0 -2px 5px rgba(60,80,150,.35), 0 4px 10px rgba(60,80,150,.3);
+  }
+  .heroOrb {
+    width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 22px;
+    background:
+      radial-gradient(circle at 30% 24%, rgba(255,255,255,.98) 0%, rgba(255,255,255,.2) 24%, transparent 42%),
+      radial-gradient(circle at 72% 82%, rgba(124,156,255,.85), transparent 58%),
+      radial-gradient(circle at 20% 80%, rgba(127,227,210,.8), transparent 55%),
+      linear-gradient(140deg, rgba(255,158,198,.85), rgba(124,156,255,.85));
+    box-shadow:
+      inset 0 -8px 18px rgba(50,70,150,.4), inset 0 6px 12px rgba(255,255,255,.7),
+      0 24px 50px -12px rgba(80,100,180,.5);
+    animation: float 5.5s ease-in-out infinite;
+    transition: transform .25s ease-out;
+  }
+  @keyframes float { 0%,100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+
+  .hero { max-width: 620px; margin: 0 auto; width: 100%; padding: 44px 20px 18px; text-align: center; }
+  .hero h1 { font-size: clamp(27px, 6.5vw, 40px); font-weight: 800; letter-spacing: -.03em; line-height: 1.3; }
+  .hero h1 span {
+    background: linear-gradient(120deg, #5d7dfd, #e05fa8);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { margin: 15px auto 0; font-size: 14.5px; line-height: 1.8; color: var(--dim); max-width: 44ch; }
+
+  .chat { flex: 1; max-width: 620px; margin: 0 auto; width: 100%; padding: 8px 20px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin: 22px 0; }
+  .chip {
+    padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink);
+    cursor: pointer; border: none; transition: transform .15s;
+  }
+  .chip:hover { transform: translateY(-2px) scale(1.02); }
+
+  .msg { margin: 17px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 14px 18px; font-size: 15px; line-height: 1.7; }
+  .msg.ai .bubble { border-bottom-left-radius: 6px; }
+  .msg.user .bubble {
+    background: linear-gradient(135deg, #5d7dfd, #9a6cf0); color: #fff;
+    border-radius: 22px; border-bottom-right-radius: 6px;
+    box-shadow: 0 14px 34px -10px rgba(93,125,253,.6), inset 0 1.5px 0 rgba(255,255,255,.45);
+  }
+  .msg.ai .label { font-size: 11px; font-weight: 800; color: #5d7dfd; margin-bottom: 6px; }
+  .cursor { display: inline-block; width: 7px; height: 14px; background: #5d7dfd; vertical-align: -2px; animation: blink 1s steps(1) infinite; border-radius: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  }
+  .inputbar .box {
+    max-width: 596px; margin: 0 auto; display: flex; gap: 7px; align-items: center;
+    border-radius: 999px; padding: 6px 6px 6px 20px;
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #8d93a8; }
+  .send {
+    width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #fff;
+    background: linear-gradient(135deg, #5d7dfd, #e05fa8);
+    box-shadow: 0 10px 24px -6px rgba(93,125,253,.65), inset 0 1.5px 0 rgba(255,255,255,.5);
+  }
+</style>
+</head>
+<body>
+  <div class="field"><i class="f1"></i><i class="f2"></i><i class="f3"></i></div>
+
+  <header class="depth">
+    <div class="bar liquid">
+      <div class="orb"></div>
+      <div class="title">AI 신건우</div>
+      <div class="status">liquid glass · 2026</div>
+    </div>
+  </header>
+
+  <div class="hero depth">
+    <div class="heroOrb" id="orb"></div>
+    <h1>투명하게 답할게요,<br><span>신건우에 대한 모든 것</span></h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈입니다. 검수된 정보만 말하고,
+    모르는 건 지어내지 않아요 — 본체가 직접 답하러 옵니다.</p>
+  </div>
+
+  <main class="chat depth">
+    <div class="chips">
+      <button class="chip liquid">어떤 일을 하셨어요?</button>
+      <button class="chip liquid">인생 영화 3편만요</button>
+      <button class="chip liquid">MBTI가 뭐예요?</button>
+      <button class="chip liquid">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일을 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble liquid">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.
+        반복을 자동화해서 사람이 더 중요한 판단에 집중하게 만드는 게 제 일이었죠.<span class="cursor"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box liquid">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var orb = document.getElementById('orb');
+  // 유리 요소마다 마우스 위치를 CSS 변수로 넘겨 스페큘러 하이라이트가 광원처럼 따라오게
+  window.addEventListener('pointermove', function (e) {
+    document.querySelectorAll('.liquid').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--sx', ((e.clientX - r.left) / r.width * 100) + '%');
+      el.style.setProperty('--sy', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+    var x = (e.clientX / window.innerWidth - .5) * 2;
+    var y = (e.clientY / window.innerHeight - .5) * 2;
+    orb.style.transform = 'rotateY(' + (x * 16) + 'deg) rotateX(' + (-y * 12) + 'deg)';
+  });
+})();
+</script>
+</body>
+</html>

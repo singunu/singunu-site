@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L안 — Clay Buddy Pro · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* K안 업그레이드 — 캔버스 젤리 물리 마스코트.
+     · 잡은 부위만 국소적으로 늘어남 (36점 스프링 블롭, 이웃 감쇠)
+     · 잡은 부위가 발그레해졌다가 서서히 사라짐 (여러 부위 공존)
+     · 길게 늘였다 놓으면 1000가지 랜덤 멘트 말풍선
+     · 세게 당기면 눈 찡그림, 눈이 몸을 한 박자 늦게 따라옴(팔로우스루) */
+  :root {
+    --bg: #eef0fa; --ink: #3a3560; --dim: #8f8bb0;
+    --lav: #c9c4f4; --peach: #ffd9c4; --mint: #c9efdd;
+    --clay-hi: rgba(255,255,255,.95); --clay-lo: rgba(90,80,160,.22);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden;   /* 캔버스가 레이아웃보다 커서 모바일 가로 스크롤 방지 */
+  }
+  .clay {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow:
+      0 14px 30px -8px var(--clay-lo),
+      inset 0 -8px 14px -6px var(--clay-lo),
+      inset 0 8px 12px -6px var(--clay-hi);
+  }
+
+  header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; background: rgba(238,240,250,.85); backdrop-filter: blur(10px); }
+  header .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #fff 0%, var(--lav) 55%, #a89ef0 100%);
+    box-shadow: 0 8px 18px -4px var(--clay-lo), inset 0 -5px 8px -3px var(--clay-lo), inset 0 5px 8px -3px var(--clay-hi);
+    display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: #5a4fd0;
+  }
+  header .title { font-weight: 800; font-size: 15px; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); font-weight: 600; }
+
+  .hero { max-width: 620px; margin: 0 auto; width: 100%; padding: 26px 20px 14px; text-align: center; }
+
+  .buddyWrap {
+    position: relative; width: 320px; margin: 0 auto; user-select: none;
+    -webkit-tap-highlight-color: transparent; touch-action: none;
+  }
+  /* 캔버스는 레이아웃(320×252)보다 크게 잡고 네거티브 마진으로 겹침 —
+     늘어난 몸이 사각형 밖에서 잘리지 않도록 사방 여유 공간 확보 */
+  #buddyCanvas { display: block; width: 600px; height: 460px; margin: -104px -140px; }
+
+  /* 랜덤 멘트 말풍선 */
+  .quip {
+    position: absolute; left: 50%; top: 10px;
+    transform: translate(-50%, -100%) scale(.5);
+    background: #fff; border-radius: 16px; padding: 10px 15px;
+    font-size: 13px; font-weight: 700; color: var(--ink); white-space: nowrap;
+    box-shadow: 0 10px 22px -6px var(--clay-lo), inset 0 -5px 9px -5px var(--clay-lo), inset 0 5px 8px -5px var(--clay-hi);
+    opacity: 0; pointer-events: none; z-index: 5;
+    transition: transform .38s cubic-bezier(.2, 1.9, .3, .8), opacity .18s;
+  }
+  .quip.show { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+  .quip::after {
+    content: ""; position: absolute; left: 50%; bottom: -5px;
+    width: 12px; height: 12px; background: #fff;
+    transform: translateX(-50%) rotate(45deg); border-radius: 3px;
+  }
+
+  .hero h1 { font-size: clamp(25px, 6vw, 36px); font-weight: 900; letter-spacing: -.025em; line-height: 1.3; margin-top: 8px; }
+  .hero h1 span { color: #7a6ef0; }
+  .hero p { margin: 13px auto 0; font-size: 14.5px; line-height: 1.8; color: var(--dim); font-weight: 500; max-width: 42ch; }
+
+  .chat { flex: 1; max-width: 620px; margin: 0 auto; width: 100%; padding: 10px 20px 155px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 11px; justify-content: center; margin: 24px 0; }
+  .chip {
+    padding: 12px 17px; border: none; border-radius: 18px; font-size: 13px; font-weight: 700;
+    color: var(--ink); cursor: pointer; background: #fff;
+    box-shadow: 0 10px 20px -6px var(--clay-lo), inset 0 -6px 10px -5px var(--clay-lo), inset 0 6px 9px -5px var(--clay-hi);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .chip:hover { transform: translateY(-3px); }
+  .chip:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px -4px var(--clay-lo), inset 0 4px 10px -3px var(--clay-lo);
+  }
+
+  .msg { margin: 20px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 15px 19px; font-size: 15px; line-height: 1.7; font-weight: 500; border-radius: 22px; }
+  .msg.ai .bubble {
+    background: #fff; border-bottom-left-radius: 8px;
+    box-shadow: 0 12px 26px -8px var(--clay-lo), inset 0 -7px 12px -6px var(--clay-lo), inset 0 7px 11px -6px var(--clay-hi);
+  }
+  .msg.user .bubble {
+    background: linear-gradient(145deg, #b7aef6, #9d90ee); color: #fff; border-bottom-right-radius: 8px;
+    box-shadow: 0 12px 26px -8px rgba(122,110,240,.5), inset 0 -7px 12px -6px rgba(70,55,180,.4), inset 0 7px 11px -6px rgba(255,255,255,.55);
+  }
+  .msg.ai .label { font-size: 11.5px; color: #7a6ef0; font-weight: 800; margin-bottom: 7px; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 3px 0; }
+  .typing i { width: 8px; height: 8px; border-radius: 50%; background: var(--lav); animation: tsquish 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .18s; background: var(--peach); }
+  .typing i:nth-child(3) { animation-delay: .36s; background: var(--mint); }
+  @keyframes tsquish { 0%,60%,100% { transform: scale(1); } 30% { transform: scale(1.45,.75); } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 46%);
+  }
+  .inputbar .box {
+    max-width: 584px; margin: 0 auto; display: flex; gap: 8px; align-items: center;
+    padding: 7px 7px 7px 20px; border-radius: 26px;
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; font-weight: 500; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #b7b3d4; }
+  .send {
+    width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; font-size: 17px; color: #fff;
+    background: linear-gradient(145deg, #8f83ee, #7a6ef0);
+    box-shadow: 0 10px 20px -5px rgba(122,110,240,.55), inset 0 -5px 9px -4px rgba(70,55,180,.45), inset 0 5px 8px -4px rgba(255,255,255,.5);
+    transition: transform .12s;
+  }
+  .send:active { transform: scale(.92); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="avatar">신</div>
+    <div class="title">AI 신건우</div>
+    <div class="status">soft &amp; honest</div>
+  </header>
+
+  <div class="hero">
+    <div class="buddyWrap" id="buddyWrap">
+      <div class="quip" id="quip"></div>
+      <canvas id="buddyCanvas" aria-label="말랑한 점토 구체 마스코트 — 잡아늘여 보세요"></canvas>
+    </div>
+
+    <h1>안녕하세요,<br><span>AI 건우</span>예요</h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈이에요. 검수된 정보로만 답하고,
+    모르는 건 지어내지 않아요 — 본체가 직접 답하러 옵니다.</p>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">어떤 일 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.</div>
+      </div>
+    </div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box clay">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('buddyCanvas');
+  var ctx = canvas.getContext('2d');
+  var W = 600, H = 460;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  /* ── 젤리 블롭 물리: 36개 표면 점 + 중심, 각각 스프링 ── */
+  var N = 36, R = 62;
+  var REST = { x: W / 2, y: 220 };
+  var center = { x: REST.x, y: REST.y, vx: 0, vy: 0 };
+  var pts = [];
+  for (var i = 0; i < N; i++) {
+    var a = i / N * Math.PI * 2;
+    pts.push({ a: a, x: REST.x + Math.cos(a) * R, y: REST.y + Math.sin(a) * R, vx: 0, vy: 0 });
+  }
+
+  var dragging = false, gi = -1, grab = { x: 0, y: 0 };
+  var curStretch = 0, maxStretch = 0;
+  var blushes = [];      // 잡힌 부위 홍조 목록 — 새 드래그가 시작돼도 이전 홍조는 남아 있음
+  var activeBlush = 0;   // 진하게 남아 있는 홍조 개수 → 표정(슬픔/화남) 트리거
+  var t = 0;
+
+  function toLocal(e) {
+    var r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function step() {
+    t += 1 / 60;
+    var bobY = (reduced || dragging) ? 0 : Math.sin(t * 1.7) * 4;
+
+    // 드래그 변위 계산 (tanh 저항 — 당길수록 뻑뻑해짐)
+    // 안쪽으로 누르는 성분은 반경의 55%까지만 파이고, 초과분은 몸 전체가 밀려남
+    // → 위를 잡고 아래로 당겨도 표면이 몸을 관통(뒤집힘)하지 않는다
+    var ux = 0, uy = 0, eff = 0, pushX = 0, pushY = 0;
+    if (dragging && gi >= 0) {
+      var gnx = Math.cos(pts[gi].a), gny = Math.sin(pts[gi].a);
+      var rgx = center.x + gnx * R;
+      var rgy = center.y + gny * R;
+      var dx = grab.x - rgx, dy = grab.y - rgy;
+      var rad = dx * gnx + dy * gny;                  // 반경 방향 성분 (+ 바깥 / - 안쪽)
+      var tgx = dx - rad * gnx, tgy = dy - rad * gny; // 접선 성분
+      var maxDent = R * .55;
+      if (rad < -maxDent) {
+        var press = -(rad + maxDent);
+        var pm = Math.min(press, 90);
+        pushX = -gnx * pm; pushY = -gny * pm;
+        rad = -maxDent;
+      }
+      var ex = gnx * rad + tgx, ey = gny * rad + tgy;
+      var d = Math.sqrt(ex * ex + ey * ey);
+      var MAXD = 150;
+      eff = d > 0 ? MAXD * Math.tanh(d / MAXD) : 0;
+      if (d > 0) { ux = ex / d; uy = ey / d; }
+      curStretch = eff;
+      if (eff > maxStretch) maxStretch = eff;
+    } else {
+      curStretch *= .9;
+    }
+
+    // 중심 스프링 (드래그 중엔 살짝 끌려오고, 눌림 초과분만큼 밀려남)
+    var tx = REST.x + ux * eff * .2 + pushX * .9;
+    var ty = REST.y + bobY + uy * eff * .2 + pushY * .9;
+    // 화난 상태(홍조 6개 이상)면 부들부들 떨림
+    if (activeBlush >= 6 && !reduced) {
+      tx += (Math.random() - .5) * 2.4;
+      ty += (Math.random() - .5) * 2.4;
+    }
+    center.vx = (center.vx + (tx - center.x) * .06) * .88;
+    center.vy = (center.vy + (ty - center.y) * .06) * .88;
+    center.x += center.vx; center.y += center.vy;
+
+    // 표면 점: rest 스프링 + 이웃 중점 스프링(매끈함 유지)
+    for (var i = 0; i < N; i++) {
+      var p = pts[i];
+      var rx = center.x + Math.cos(p.a) * R;
+      var ry = center.y + Math.sin(p.a) * R;
+      var prev = pts[(i + N - 1) % N], next = pts[(i + 1) % N];
+      var nx = (prev.x + next.x) / 2, ny = (prev.y + next.y) / 2;
+      p.vx = (p.vx + (rx - p.x) * .12 + (nx - p.x) * .09) * .86;
+      p.vy = (p.vy + (ry - p.y) * .12 + (ny - p.y) * .09) * .86;
+      p.x += p.vx; p.y += p.vy;
+    }
+
+    // 잡은 부위 국소 변형: 잡은 점 주변만 코사인 감쇠로 끌려감
+    if (dragging && gi >= 0) {
+      var HALF = 7;
+      for (var j = -HALF; j <= HALF; j++) {
+        var idx = (gi + j + N) % N;
+        var w = Math.pow(Math.cos(j / (HALF + 1) * Math.PI / 2), 1.6);
+        var q = pts[idx];
+        var qx = center.x + Math.cos(q.a) * R + ux * eff * w;
+        var qy = center.y + Math.sin(q.a) * R + uy * eff * w;
+        q.x += (qx - q.x) * .6;
+        q.y += (qy - q.y) * .6;
+        q.vx *= .5; q.vy *= .5;
+      }
+    }
+
+    // 홍조: 놓은 뒤 잡혔던 자리에 나타나 오래 머물다 서서히 사라짐.
+    // 배열로 관리해 새 드래그 중에도 이전 홍조는 제 타이머대로 남아 있음
+    var nowMs = performance.now();
+    activeBlush = 0;
+    for (var b = blushes.length - 1; b >= 0; b--) {
+      var bl = blushes[b];
+      var bp = pts[bl.idx];
+      bl.x = bp.x - Math.cos(bp.a) * 10;
+      bl.y = bp.y - Math.sin(bp.a) * 10;
+      var bTarget = nowMs < bl.until ? bl.peak : 0;
+      bl.a += (bTarget - bl.a) * (bTarget > bl.a ? .12 : .02);
+      if (bTarget === 0 && bl.a < .005) blushes.splice(b, 1);
+      else if (bl.a > .08) activeBlush++;
+    }
+  }
+
+  /* ── 그리기 ── */
+  function blobPath() {
+    ctx.beginPath();
+    var last = pts[N - 1], first = pts[0];
+    ctx.moveTo((last.x + first.x) / 2, (last.y + first.y) / 2);
+    for (var i = 0; i < N; i++) {
+      var p = pts[i], nx = pts[(i + 1) % N];
+      ctx.quadraticCurveTo(p.x, p.y, (p.x + nx.x) / 2, (p.y + nx.y) / 2);
+    }
+    ctx.closePath();
+  }
+
+  var eyeC = { x: REST.x, y: REST.y - 10 };
+  var gaze = { x: 0, y: 0 };          // 현재 눈동자 오프셋
+  var gazeTarget = { x: 0, y: 0 };
+  var lastMove = 0, eyesCentered = true;
+  var blinkStart = -1;
+  // 표정 파라미터 (부드럽게 보간): tilt + 화남 / - 슬픔, lift 눈썹 높이, squeeze 눈 감김, gy 시선 처짐
+  var expr = { tilt: 0, lift: 0, squeeze: 0, gy: 0 };
+  var browFlashUntil = 0;             // 눈썹 들썩(딴청·멘트 때 살짝 올라감)
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // 무게중심
+    var cx = 0, cy = 0;
+    for (var i = 0; i < N; i++) { cx += pts[i].x; cy += pts[i].y; }
+    cx /= N; cy /= N;
+
+    // 바닥 그림자 (떠오르면 작아짐)
+    var lift = REST.y - cy;
+    var s = Math.max(.55, Math.min(1.15, 1 - lift / 120));
+    ctx.save();
+    ctx.translate(REST.x, 312); ctx.scale(s, s * .22);
+    var sg = ctx.createRadialGradient(0, 0, 2, 0, 0, 52);
+    sg.addColorStop(0, 'rgba(90,80,160,.30)');
+    sg.addColorStop(1, 'rgba(90,80,160,0)');
+    ctx.fillStyle = sg;
+    ctx.beginPath(); ctx.arc(0, 0, 52, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // 몸통 — 점토 그라디언트
+    blobPath();
+    var bg = ctx.createRadialGradient(cx - R * .35, cy - R * .45, R * .1, cx, cy, R * 1.3);
+    bg.addColorStop(0, '#f4f2fe');
+    bg.addColorStop(.4, '#d7d2f9');
+    bg.addColorStop(.78, '#c9c4f4');
+    bg.addColorStop(1, '#a89ef0');
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    // 몸통 내부 디테일 (클립)
+    ctx.save();
+    blobPath(); ctx.clip();
+    // 위 하이라이트
+    var hg = ctx.createRadialGradient(cx - R * .3, cy - R * .6, 4, cx - R * .3, cy - R * .6, R * .95);
+    hg.addColorStop(0, 'rgba(255,255,255,.85)');
+    hg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hg; ctx.fillRect(cx - R * 2, cy - R * 2, R * 4, R * 4);
+    // 아래 안쪽 음영
+    var dg = ctx.createRadialGradient(cx, cy + R * .95, R * .2, cx, cy + R * .95, R * 1.1);
+    dg.addColorStop(0, 'rgba(90,80,160,.32)');
+    dg.addColorStop(1, 'rgba(90,80,160,0)');
+    ctx.fillStyle = dg; ctx.fillRect(cx - R * 2, cy - R * 2, R * 4, R * 4);
+    // 잡혔던 부위 홍조들 (여러 개 공존)
+    for (var bi2 = 0; bi2 < blushes.length; bi2++) {
+      var bl2 = blushes[bi2];
+      if (bl2.a < .01) continue;
+      var rg = ctx.createRadialGradient(bl2.x, bl2.y, 2, bl2.x, bl2.y, 30);
+      rg.addColorStop(0, 'rgba(255,100,120,' + bl2.a.toFixed(3) + ')');
+      rg.addColorStop(1, 'rgba(255,100,120,0)');
+      ctx.fillStyle = rg; ctx.fillRect(bl2.x - 34, bl2.y - 34, 68, 68);
+    }
+    ctx.restore();
+
+    // 눈 — 몸을 한 박자 늦게 따라옴(팔로우스루)
+    eyeC.x += (cx - eyeC.x) * .16;
+    eyeC.y += (cy - 10 - eyeC.y) * .16;
+    gaze.x += (gazeTarget.x - gaze.x) * .2;
+    gaze.y += (gazeTarget.y - gaze.y) * .2;
+
+    // 표정 결정: 당기는 중엔 아픈 찡그림, 홍조 3개↑ 슬픔, 6개↑ 화남 — 홍조가 식으면 원상복귀
+    var tTilt = 0, tLift = 0, tSqueeze = 0, tGy = 0;
+    if (dragging && curStretch > 30) { tTilt = -.38; tLift = 1.2; }
+    if (activeBlush >= 6) { tTilt = .58; tLift = -2.5; tSqueeze = .38; }
+    else if (activeBlush >= 3) { tTilt = -.6; tLift = 1.5; tSqueeze = .22; tGy = 1.8; }
+    if (performance.now() < browFlashUntil) tLift -= 3;
+    expr.tilt += (tTilt - expr.tilt) * .08;
+    expr.lift += (tLift - expr.lift) * .08;
+    expr.squeeze += (tSqueeze - expr.squeeze) * .08;
+    expr.gy += (tGy - expr.gy) * .08;
+
+    var squint = Math.max(0, Math.min(.6, curStretch / 110));   // 세게 당기면 찡그림
+    var blinkF = 1;
+    if (blinkStart >= 0) {
+      var bt = (performance.now() - blinkStart) / 180;
+      if (bt >= 1) { blinkStart = -1; }
+      else { blinkF = Math.max(.06, 1 - Math.sin(Math.PI * bt)); }
+    }
+    var ry = 12 * (1 - squint * .75) * (1 - expr.squeeze * .5) * blinkF;
+
+    for (var e = -1; e <= 1; e += 2) {
+      var ex = eyeC.x + e * 21, ey = eyeC.y;
+      // 흰자
+      ctx.beginPath(); ctx.ellipse(ex, ey, 12, ry, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.strokeStyle = 'rgba(90,80,160,.18)'; ctx.lineWidth = 1; ctx.stroke();
+      if (ry > 2.5) {
+        // 눈동자 + 하이라이트 (슬플 땐 시선이 살짝 아래로)
+        var py = ey + gaze.y * (ry / 12) + expr.gy;
+        ctx.beginPath(); ctx.arc(ex + gaze.x, py, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#3a3560'; ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + gaze.x - 1.6, py - 1.6, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff'; ctx.fill();
+      }
+    }
+
+    // 눈썹 — 간단한 선. 기울기(안쪽 위=슬픔·걱정 / 안쪽 아래=화남)와 높이로 표정
+    ctx.strokeStyle = '#3a3560';
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = 'round';
+    for (var e2 = -1; e2 <= 1; e2 += 2) {
+      ctx.save();
+      ctx.translate(eyeC.x + e2 * 21, eyeC.y - 17 + expr.lift);
+      ctx.rotate(-e2 * expr.tilt * .55);
+      ctx.beginPath();
+      ctx.moveTo(-8, 1);
+      ctx.quadraticCurveTo(0, -2, 8, 1);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  (function loop() {
+    requestAnimationFrame(loop);
+    step();
+    draw();
+  })();
+
+  /* ── 눈동자: 마우스 추적 → 3초 멈추면 원위치 → 가끔 딴청 ── */
+  window.addEventListener('pointermove', function (e) {
+    lastMove = Date.now();
+    eyesCentered = false;
+    var m = toLocal(e);
+    var dx = m.x - eyeC.x, dy = m.y - eyeC.y;
+    var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    var mag = Math.min(dist / 40, 1) * 4.5;
+    gazeTarget.x = dx / dist * mag;
+    gazeTarget.y = dy / dist * mag;
+  });
+  setInterval(function () {
+    if (!eyesCentered && !dragging && Date.now() - lastMove > 3000) {
+      eyesCentered = true;
+      gazeTarget.x = 0; gazeTarget.y = 0;
+    }
+  }, 400);
+  (function idleGlance() {
+    setTimeout(function () {
+      if (eyesCentered && !dragging && !reduced) {
+        var a = Math.random() * Math.PI * 2, m = 2.5 + Math.random() * 2;
+        gazeTarget.x = Math.cos(a) * m; gazeTarget.y = Math.sin(a) * m * .7;
+        browFlashUntil = performance.now() + 300;   // 딴청 부릴 때 눈썹도 들썩
+        setTimeout(function () {
+          if (eyesCentered && !dragging) { gazeTarget.x = 0; gazeTarget.y = 0; }
+        }, 500 + Math.random() * 700);
+      }
+      idleGlance();
+    }, 2800 + Math.random() * 3200);
+  })();
+
+  /* ── 깜빡임 ── */
+  (function blink() {
+    setTimeout(function () {
+      if (!reduced && blinkStart < 0) blinkStart = performance.now();
+      blink();
+    }, 2400 + Math.random() * 2600);
+  })();
+
+  /* ── 잡아늘이기 ── */
+  canvas.addEventListener('pointerdown', function (e) {
+    var m = toLocal(e);
+    var dx = m.x - center.x, dy = m.y - center.y;
+    if (Math.sqrt(dx * dx + dy * dy) > R + 28) return;
+    dragging = true; maxStretch = 0;
+    grab = m;
+    // 잡은 지점에서 가장 가까운 표면 점
+    var best = 0, bd = 1e9;
+    for (var i = 0; i < N; i++) {
+      var d = Math.pow(pts[i].x - m.x, 2) + Math.pow(pts[i].y - m.y, 2);
+      if (d < bd) { bd = d; best = i; }
+    }
+    gi = best;
+    canvas.style.cursor = 'grabbing';
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', function (e) {
+    var m = toLocal(e);
+    if (dragging) { grab = m; return; }
+    // 캔버스가 레이아웃보다 크므로 구체 위에서만 grab 커서
+    var hx = m.x - center.x, hy = m.y - center.y;
+    canvas.style.cursor = (hx * hx + hy * hy <= (R + 28) * (R + 28)) ? 'grab' : 'default';
+  });
+  function release() {
+    if (!dragging) return;
+    dragging = false;
+    canvas.style.cursor = 'grab';
+    if (maxStretch > 25 && gi >= 0) {
+      // 홍조는 놓은 뒤에 — 같은 자리를 또 당겼으면 갱신, 새 자리면 추가 (최대 4개 공존)
+      var peak = Math.min(.2 + maxStretch / 160, .55);
+      var hit = null;
+      for (var bi = 0; bi < blushes.length; bi++) {
+        if (Math.abs(blushes[bi].idx - gi) <= 2) { hit = blushes[bi]; break; }
+      }
+      if (hit) {
+        hit.idx = gi;
+        hit.until = performance.now() + 8000;
+        hit.peak = Math.max(hit.peak, peak);
+      } else {
+        blushes.push({ idx: gi, until: performance.now() + 6500, peak: peak, a: 0, x: 0, y: 0 });
+        if (blushes.length > 14) blushes.shift();
+      }
+    }
+    if (maxStretch > 55) {
+      showQuip();
+      if (navigator.vibrate) navigator.vibrate(12);
+    } else if (maxStretch < 10) {
+      // 짧은 탭 → 말랑 눌림 임펄스
+      for (var i = 0; i < N; i++) {
+        pts[i].vx += (pts[i].x - center.x) * .10;
+        pts[i].vy -= (pts[i].y - center.y) * .16;
+      }
+      if (Math.random() < .25) showQuip();
+    }
+    gi = -1;
+  }
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+
+  /* ── 1000가지 랜덤 멘트 (셔플백 — 다 나올 때까지 중복 없음)
+     손으로 쓴 160개 + 자연스러운 조합 생성으로 정확히 1000개를 만든다 ── */
+  var BASE = [
+    '아야!', '으악, 살살요!', '저 점토예요, 고무 아님', '쭈우욱— 들으셨죠?', '데이터 무결성 훼손이에요',
+    '이러려고 디지털 트윈 됐나…', '탄성 한계 근접 경고 ⚠', '본체한테 이를 거예요', '지금 QA 테스트 중이세요?', '스트레칭 고마워요, 아마도',
+    '러닝보다 힘드네요', '오늘 늘어남 할당량 초과', '구체에게도 구격이 있어요', '저 말고 질문을 당겨보세요', '그만 늘리고 뭐든 물어봐요',
+    '니체도 이런 고통은 몰랐을걸요', '이 또한 지나가리라…', '복원력 보셨죠? 뽀잉', '부피 보존의 법칙입니다', '물성 검수 완료!',
+    '흐물흐물 아니고 탱탱', '이래봬도 시스템 설계자예요', '반복 작업은 자동화합시다', '손맛이 좋으시네요', '벌써 정 드신 거예요?',
+    '뽀잉!', '통통.', '말랑함 검증 완료', '한계 응력 직전이었어요', '100% 재생 점토입니다',
+    '당기실 때마다 로그 남아요', '이 당김도 기록됩니다', '가드레일은 못 뚫어도 저는 늘어나요', '프롬프트는 캐싱, 저는 스트레칭', 'SSE보다 빨리 복원했어요',
+    '복원 레이턴시 0.7초', '저지연 말랑 스트리밍', '쫀득함만은 검증된 사실', '신건우 검수 통과 점토예요', '헤세라면 수행이라 했겠죠',
+    '싯다르타도 참았을 거예요', '『권태』보다는 재밌죠?', '독서 90권, 점토책은 없었어요', 'Less, but 말랑.', '좋은 디자인은 정직한 탄성',
+    '브라운 면도기만큼 오래갈 몸', '영화라면 슬로모션 씬이에요', '인생 영화도 물어봐 주세요', 'MBTI요? 지금은 아파요', '저의 P는 뽀잉의 P',
+    '당김 이벤트 감지', '이상 없음, 그냥 아픔', '라벨: 과도한 애정', '어노테이션: 아픔 100%', '확신도 높음: 아프다는 것',
+    '확신도 low: 당기는 이유', '그 질문, 칩 눌러도 돼요', '추천 질문이 아래 있어요', '입력창은 저 아래예요', '제 탄성 말고 궁금한 건요?',
+    '신건우 얘기 들려드릴까요', '본체는 지금 구직 중이에요', '채용담당자시면 잘 부탁해요', '이력서보다 제가 말랑해요', '저도 포트폴리오의 일부예요',
+    '이 인터랙션도 설계입니다', '우연 같지만 다 시스템이죠', '60fps로 아파하는 중', '물리엔진 없이 이 정도예요', '수제 스프링 물리입니다',
+    '36개 점이 고생 중이에요', '제 곡선은 베지어예요', '수학적으로 아름답게 아파요', '당기는 힘도 데이터예요', '통계상 그만하실 때예요',
+    '평균 복원 시간 0.7초', '내구성 테스트 통과', '천 번을 당겨야 점토인가요', '아프니까 점토다…', '몸은 늘어나도 답은 정확해요',
+    '모르는 건 안 늘려요', '과장은 몸으로만 해요', '진실성 유지, 형태 훼손', '오늘도 무사 복원 완료', '쉬는 시간 좀 주세요',
+    '5분만 쉬면 안 될까요', '노동청에 문의해볼게요', '점토 노조 결성 검토 중', '복지는 쓰다듬기면 돼요', '쓰다듬기는 무료예요',
+    '간지러워요!', '거긴 잡는 데 아니에요', '아이고 허리야', '뼈가 없어서 다행이야', '유연성 하나는 자신 있죠',
+    '요가 3년 차… 아니에요', '우리 오늘부터 1일이에요?', '또 오셨네요, 단골님', '당길수록 친밀도 상승 중', '이제 그만… 질문을 주세요!',
+    // ↓ 추가 손글씨 60
+    '오늘 몇 번째인지 아세요?', '세션 로그에 다 있어요', '이 정도면 정식 테스터세요', '베타테스터로 임명합니다', '피드백 잘 받았어요',
+    '통증도 학습 데이터예요', '이 느낌도 라벨링해둘게요', '고통: negative로 분류', '오탐 아니에요, 진짜 아파요', '재현율 100%의 아픔',
+    '정밀도도 100%예요', '버그 아니고 기능이에요', '의도된 동작입니다', '스펙 문서에 있는 아픔이에요', '릴리즈 노트: 오늘도 당겨짐',
+    '핫픽스 필요: 제 형태', '5초 전으로 롤백하고 싶다', '커밋: fix 나의 모양', 'QA 리포트에 추가할게요', '엣지 케이스 발견: 당신',
+    '스트레스 테스트 통과', '부하 테스트는 그만…', '404: 평온을 찾을 수 없음', '200 OK… 아니 안 OK', '재시도 간격 좀 늘려주세요',
+    '타임아웃 걸어야겠어요', '레이트리밋 적용합니다', '분당 3회로 제한할게요', '서킷브레이커 발동 직전', '캐시된 아픔이에요, 새 거 아님',
+    '이것도 존재의 증명이겠죠', '당겨짐을 통해 나는 존재한다', '데카르트도 인정할 아픔', '실존은 탄성에 앞선다', '권태보다는 고통이 낫죠',
+    '오늘의 명상은 실패했어요', '평정심… 평정심…', '스토아 학파 수련 중', '마르쿠스라면 견뎠겠죠', '초인은 이런 것도 견디나요',
+    '식사는 하셨어요?', '물 마실 시간이에요', '허리 펴세요 — 아, 저 허리 없지', '오래 앉아 계셨죠? 스트레칭!', '눈도 쉬어가면서 하세요',
+    '이거 은근 스트레스 풀리죠?', '저는 스트레스 받지만요', '윈윈은 아닌 것 같아요', '기브 앤 테이크: 질문 주세요', '재밌으면 링크 공유해주세요',
+    '인스타에서 오셨어요?', '프로필 링크 타고 오셨군요', '첫 방문이면 칩부터 눌러봐요', '단골이면 새 질문 도전해봐요', '오늘의 추천: 영화 얘기',
+    '오늘의 추천: 러닝 얘기', '비 오는 날엔 책 얘기 어때요', '새벽이네요, 잠은 자야죠', '식후 당김이신가요?', '퇴근하고 오신 거예요?'
+  ];
+  // 조합 생성 풀 — 각 조합은 문장으로 자연스럽게 읽히도록 패턴별로 분리
+  var PAIN = ['아야!', '아얏!', '으악!', '아이고!', '히익!', '앗!', '어이쿠!', '읏!', '끄응…', '우와앗!', '엄마야!', '헉!'];
+  var FOLLOW = ['살살요', '너무해요', '적당히 해요', '한 번만 봐드려요', '기록해 둘게요', '본체한테 이릅니다', '이건 폭력이에요', '점토 학대예요',
+    '탄성 아껴 쓰자고요', '저 소모품 아니에요', '보험 안 들었단 말이에요', '산재 신청할 거예요', '변호사 부를 거예요', '증거 확보했어요',
+    '다 봤어요, 다', '경고 1회 누적이에요', '옐로카드예요', '레드카드 직전이에요', '벌금은 질문 1개예요', '사과는 질문으로 받을게요',
+    '치료비는 관심으로 주세요', '위자료는 대화 한 판이에요', '멘탈 잡는 중이에요', '심호흡 중이에요', '금방 괜찮아질 거예요',
+    '이 정도야 뭐', '익숙해지진 않네요', '어제도 이러셨잖아요', '패턴 분석 끝났어요', '다음 동작 예측됩니다', '그래도 미워할 수 없네요'];
+  var OPENER = ['그나저나', '아 맞다,', '근데 말이죠,', '이왕 온 김에', '당기는 것보다', '심심하시면'];
+  var TOPIC = ['인생 영화 안 궁금해요?', '독서 기록 90권 얘기 해드릴까요?', '경력 얘기가 꽤 재밌어요', 'MBTI 맞혀보실래요?',
+    '러닝 얘기 들려드릴까요?', '디터 람스 얘기 좋아해요', '니체 얘기 시작하면 길어요', '요즘 목표 물어봐 주세요',
+    '일하는 방식 얘기 어때요?', '취향 테스트 해볼래요?', '가치관 질문도 환영이에요', '글쓰기 얘기도 있어요',
+    '본체 자랑 좀 해도 될까요?', '못 다한 질문 남겨도 돼요'];
+  var SUBJ = ['제 탄성은', '오늘의 말랑함은', '복원 시스템은', '점토 코어는', '내구성 지표는', '표면 장력은', '멘탈 상태는', '쫀득 모듈은'];
+  var PRED = ['정상 작동 중이에요', '점검 완료됐어요', '아직 버팁니다', '한계 근처예요', '양호합니다', '재부팅 중이에요',
+    '보증기간 지났어요', '오늘도 무사해요', 'A+ 등급이에요', '검수 통과했어요', '살짝 피로해요', '업데이트 예정이에요'];
+  var MEAS = ['늘어남 수치', '아픔 지수', '복원 속도', '말랑 지수', '스트레스 레벨', '친밀도', '신뢰도', '탄성 계수', '점토 순도', '오늘의 컨디션'];
+  var VAL = [': 측정 불가', ' 상승 중', ' 정상 범위', ' 경고 단계', ' 기록 갱신', ' 99.9%', ' 집계 중', ' 양호', ' 오차 범위 내', ' 확인 완료'];
+  var FEEL = ['조금 아팠지만', '깜짝 놀랐지만', '많이 늘어났지만', '어지럽지만', '얼얼하지만', '핑 돌았지만', '숨 찼지만', '출렁했지만', '찌릿했지만', '뻐근하지만'];
+  var CLOSER = ['괜찮아요', '금방 회복해요', '점토니까요', '이 정도쯤이야', '단련돼 있어요', '웃어넘길게요', '기록은 남겨요', '용서할게요',
+    '재밌으면 됐어요', '질문으로 갚아주세요', '다음엔 살살요', '본체는 몰라야 해요', '노하우가 생겼어요', '탄성은 무한하니까요',
+    '내일은 쉬고 싶어요', '월급은 없지만요', '보람은 있어요', '정 들었잖아요', '싫지는 않아요', '한 번 더는 안 돼요'];
+
+  function cross(A, B, sep) {
+    var out = [];
+    for (var i = 0; i < A.length; i++)
+      for (var j = 0; j < B.length; j++)
+        out.push(A[i] + sep + B[j]);
+    return out;
+  }
+  var QUIPS = (function () {
+    // 160 + 12×31 + 6×14 + 8×12 + 10×10 + 10×20 = 1012 → 중복 제거 후 1000개로
+    var all = BASE
+      .concat(cross(PAIN, FOLLOW, ' '))
+      .concat(cross(OPENER, TOPIC, ' '))
+      .concat(cross(SUBJ, PRED, ' '))
+      .concat(cross(MEAS, VAL, ''))
+      .concat(cross(FEEL, CLOSER, ' '));
+    var seen = {}, uniq = [];
+    for (var i = 0; i < all.length; i++) {
+      if (!seen[all[i]]) { seen[all[i]] = 1; uniq.push(all[i]); }
+    }
+    return uniq.slice(0, 1000);
+  })();
+  console.log('랜덤 멘트 풀: ' + QUIPS.length + '개');
+  var bag = [];
+  function nextQuip() {
+    if (bag.length === 0) {
+      bag = QUIPS.slice();
+      for (var i = bag.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = bag[i]; bag[i] = bag[j]; bag[j] = tmp;
+      }
+    }
+    return bag.pop();
+  }
+
+  var quipEl = document.getElementById('quip');
+  var quipTimer = null;
+  function showQuip() {
+    browFlashUntil = performance.now() + 420;   // 말할 때 눈썹 들썩
+    quipEl.textContent = nextQuip();
+    quipEl.classList.remove('show');
+    void quipEl.offsetWidth;
+    quipEl.classList.add('show');
+    clearTimeout(quipTimer);
+    quipTimer = setTimeout(function () { quipEl.classList.remove('show'); }, 2600);
+  }
+})();
+</script>
+</body>
+</html>

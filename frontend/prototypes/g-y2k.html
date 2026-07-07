@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G안 — Y2K Dopamine · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 2026 트렌드: 도파민 디자인 · Y2K 크롬/네온 리바이벌 — 채도 높은 팔레트와 글로시 버블 */
+  :root {
+    --bg1: #ff2fb2; --bg2: #6a3bff; --bg3: #00e0ff;
+    --ink: #1a0b2e; --panel: #ffffff; --dim: #6b5f8a;
+    --chrome1: #00f5d4; --chrome2: #ff2fb2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    color: var(--ink); min-height: 100dvh; display: flex; flex-direction: column;
+    background:
+      radial-gradient(circle at 10% -10%, var(--bg3) 0%, transparent 40%),
+      radial-gradient(circle at 100% 0%, var(--bg1) 0%, transparent 45%),
+      radial-gradient(circle at 50% 100%, var(--bg2) 0%, transparent 55%),
+      #ffe9f6;
+    background-attachment: fixed;
+  }
+
+  header {
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header .logo {
+    font-weight: 900; font-size: 18px; letter-spacing: -.02em;
+    background: linear-gradient(90deg, var(--chrome1), var(--chrome2), var(--chrome1));
+    background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 3.5s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: 200% center; } }
+  header .status {
+    margin-left: auto; font-size: 11px; font-weight: 800; color: #fff; padding: 6px 12px;
+    background: var(--ink); border-radius: 999px;
+  }
+
+  .hero { max-width: 620px; margin: 0 auto; width: 100%; padding: 46px 20px 20px; text-align: center; }
+  .hero .bubble-tag {
+    display: inline-block; padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    background: #fff; box-shadow: 0 4px 0 rgba(26,11,46,.15), 0 8px 20px rgba(255,47,178,.35);
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 7vw, 42px); font-weight: 900; letter-spacing: -.03em; line-height: 1.25;
+    color: #fff; text-shadow: 0 2px 0 rgba(26,11,46,.2);
+  }
+  .hero h1 span {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--chrome1), var(--chrome2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p { margin: 16px auto 0; font-size: 14.5px; line-height: 1.8; color: #fff; opacity: .92; max-width: 42ch; }
+
+  .chat { flex: 1; max-width: 620px; margin: 0 auto; width: 100%; padding: 8px 20px 150px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin: 24px 0; }
+  .chip {
+    padding: 11px 16px; border-radius: 999px; border: none; font-size: 13px; font-weight: 700;
+    background: #fff; color: var(--ink); cursor: pointer;
+    box-shadow: 0 3px 0 rgba(26,11,46,.15); transition: transform .12s;
+  }
+  .chip:hover { transform: translateY(-2px) scale(1.03); }
+
+  .msg { margin: 18px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 14px 18px; border-radius: 20px; font-size: 15px; line-height: 1.65; font-weight: 500; }
+  .msg.ai .bubble { background: #fff; border-bottom-left-radius: 5px; box-shadow: 0 4px 16px rgba(90,30,120,.15); }
+  .msg.user .bubble {
+    background: linear-gradient(120deg, var(--chrome2), var(--bg2));
+    color: #fff; border-bottom-right-radius: 5px;
+  }
+  .msg.ai .label {
+    font-size: 11px; font-weight: 900; margin-bottom: 6px;
+    background: linear-gradient(90deg, var(--chrome2), var(--bg2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  }
+  .inputbar .box {
+    max-width: 596px; margin: 0 auto; display: flex; align-items: center;
+    background: #fff; border-radius: 999px; padding: 5px 5px 5px 20px;
+    box-shadow: 0 10px 30px rgba(90,20,120,.3);
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #b3a8c9; }
+  .send {
+    width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer; font-size: 17px; font-weight: 900; color: #fff;
+    background: linear-gradient(135deg, var(--chrome2), var(--bg2));
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">SINGUNU.AI</div>
+    <div class="status">ONLINE ✦</div>
+  </header>
+
+  <div class="hero">
+    <div class="bubble-tag">✦ 디지털 트윈 ✦</div>
+    <h1>신건우에 대해<br><span>궁금한 거 다 물어봐!</span></h1>
+    <p>AI 데이터 PM 신건우의 디지털 트윈이에요. 모르는 건 지어내지 않고
+    본체가 직접 답하러 와요.</p>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">어떤 일 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+</body>
+</html>

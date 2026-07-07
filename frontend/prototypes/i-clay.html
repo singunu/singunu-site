@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I안 — Claymorphism · AI 신건우</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 2026 트렌드: 클레이모피즘 — 말랑한 3D 점토 물성(이중 inset 하이라이트 + 소프트 섀도우).
+     버튼이 "물건"처럼 보여 인지 부하가 낮다. 카드엔 CSS 3D 틸트. */
+  :root {
+    --bg: #eef0fa; --ink: #3a3560; --dim: #8f8bb0;
+    --lav: #c9c4f4; --peach: #ffd9c4; --mint: #c9efdd;
+    --clay-hi: rgba(255,255,255,.95); --clay-lo: rgba(90,80,160,.22);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100dvh; display: flex; flex-direction: column;
+  }
+  /* 점토 물성 공통: 바깥 소프트 섀도우 + 안쪽 위 하이라이트 + 안쪽 아래 음영 */
+  .clay {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow:
+      0 14px 30px -8px var(--clay-lo),
+      inset 0 -8px 14px -6px var(--clay-lo),
+      inset 0 8px 12px -6px var(--clay-hi);
+  }
+
+  header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; background: rgba(238,240,250,.85); backdrop-filter: blur(10px); }
+  header .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #fff 0%, var(--lav) 55%, #a89ef0 100%);
+    box-shadow: 0 8px 18px -4px var(--clay-lo), inset 0 -5px 8px -3px var(--clay-lo), inset 0 5px 8px -3px var(--clay-hi);
+    display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; color: #5a4fd0;
+  }
+  header .title { font-weight: 800; font-size: 15px; }
+  header .status { margin-left: auto; font-size: 11px; color: var(--dim); font-weight: 600; }
+
+  .hero { max-width: 620px; margin: 0 auto; width: 100%; padding: 40px 20px 16px; perspective: 800px; }
+  .heroCard {
+    padding: 30px 28px; transform-style: preserve-3d; transition: transform .25s ease-out;
+    background: linear-gradient(145deg, #ffffff, #f4f2ff);
+  }
+  .heroCard .blobRow { display: flex; gap: 10px; margin-bottom: 18px; }
+  .blob {
+    width: 40px; height: 40px; border-radius: 42% 58% 55% 45% / 52% 44% 56% 48%;
+    box-shadow: 0 10px 18px -5px var(--clay-lo), inset 0 -6px 9px -4px var(--clay-lo), inset 0 6px 9px -4px var(--clay-hi);
+    animation: bob 3.6s ease-in-out infinite;
+  }
+  .blob.b1 { background: var(--lav); }
+  .blob.b2 { background: var(--peach); animation-delay: .5s; }
+  .blob.b3 { background: var(--mint); animation-delay: 1s; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-7px) rotate(6deg); } }
+  .heroCard h1 { font-size: clamp(25px, 6vw, 36px); font-weight: 900; letter-spacing: -.025em; line-height: 1.3; }
+  .heroCard h1 span { color: #7a6ef0; }
+  .heroCard p { margin-top: 13px; font-size: 14.5px; line-height: 1.8; color: var(--dim); font-weight: 500; }
+
+  .chat { flex: 1; max-width: 620px; margin: 0 auto; width: 100%; padding: 10px 20px 155px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 11px; margin: 24px 0; }
+  .chip {
+    padding: 12px 17px; border: none; border-radius: 18px; font-size: 13px; font-weight: 700;
+    color: var(--ink); cursor: pointer; background: #fff;
+    box-shadow: 0 10px 20px -6px var(--clay-lo), inset 0 -6px 10px -5px var(--clay-lo), inset 0 6px 9px -5px var(--clay-hi);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .chip:hover { transform: translateY(-3px); }
+  .chip:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px -4px var(--clay-lo), inset 0 4px 10px -3px var(--clay-lo);
+  }
+
+  .msg { margin: 20px 0; display: flex; }
+  .msg.user { justify-content: flex-end; }
+  .bubble { max-width: 82%; padding: 15px 19px; font-size: 15px; line-height: 1.7; font-weight: 500; border-radius: 22px; }
+  .msg.ai .bubble {
+    background: #fff; border-bottom-left-radius: 8px;
+    box-shadow: 0 12px 26px -8px var(--clay-lo), inset 0 -7px 12px -6px var(--clay-lo), inset 0 7px 11px -6px var(--clay-hi);
+  }
+  .msg.user .bubble {
+    background: linear-gradient(145deg, #b7aef6, #9d90ee); color: #fff; border-bottom-right-radius: 8px;
+    box-shadow: 0 12px 26px -8px rgba(122,110,240,.5), inset 0 -7px 12px -6px rgba(70,55,180,.4), inset 0 7px 11px -6px rgba(255,255,255,.55);
+  }
+  .msg.ai .label { font-size: 11.5px; color: #7a6ef0; font-weight: 800; margin-bottom: 7px; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 3px 0; }
+  .typing i { width: 8px; height: 8px; border-radius: 50%; background: var(--lav); animation: squish 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .18s; background: var(--peach); }
+  .typing i:nth-child(3) { animation-delay: .36s; background: var(--mint); }
+  @keyframes squish { 0%,60%,100% { transform: scale(1); } 30% { transform: scale(1.45,.75); } }
+
+  .inputbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 46%);
+  }
+  .inputbar .box {
+    max-width: 584px; margin: 0 auto; display: flex; gap: 8px; align-items: center;
+    padding: 7px 7px 7px 20px; border-radius: 26px;
+  }
+  .inputbar input { flex: 1; border: none; outline: none; background: none; font: inherit; font-size: 15px; font-weight: 500; padding: 12px 0; color: var(--ink); }
+  .inputbar input::placeholder { color: #b7b3d4; }
+  .send {
+    width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; font-size: 17px; color: #fff;
+    background: linear-gradient(145deg, #8f83ee, #7a6ef0);
+    box-shadow: 0 10px 20px -5px rgba(122,110,240,.55), inset 0 -5px 9px -4px rgba(70,55,180,.45), inset 0 5px 8px -4px rgba(255,255,255,.5);
+    transition: transform .12s;
+  }
+  .send:active { transform: scale(.92); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="avatar">신</div>
+    <div class="title">AI 신건우</div>
+    <div class="status">soft &amp; honest</div>
+  </header>
+
+  <div class="hero">
+    <div class="heroCard clay" id="tilt">
+      <div class="blobRow"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+      <h1>말랑하게 물어보세요,<br><span>답은 단단하게</span> 드릴게요</h1>
+      <p>AI 데이터 PM 신건우의 디지털 트윈이에요. 검수된 정보로만 답하고,
+      모르는 건 지어내지 않아요 — 본체가 직접 답하러 옵니다.</p>
+    </div>
+  </div>
+
+  <main class="chat">
+    <div class="chips">
+      <button class="chip">어떤 일 하셨어요?</button>
+      <button class="chip">인생 영화 3편만요</button>
+      <button class="chip">MBTI가 뭐예요?</button>
+      <button class="chip">요즘 목표는요?</button>
+    </div>
+
+    <div class="msg user"><div class="bubble">어떤 일 하셨어요?</div></div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble">AI 학습 데이터의 의미적 정확성을 검증하는 데이터 PM으로 일했어요.
+        100명 규모 라벨링 조직을 시트와 정책으로 시스템화해서 굴렸습니다.</div>
+      </div>
+    </div>
+    <div class="msg ai">
+      <div>
+        <div class="label">AI 건우</div>
+        <div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="inputbar">
+    <div class="box clay">
+      <input placeholder="신건우에 대해 물어보세요..." />
+      <button class="send">↑</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var card = document.getElementById('tilt');
+  card.addEventListener('pointermove', function (e) {
+    var r = card.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - .5;
+    var y = (e.clientY - r.top) / r.height - .5;
+    card.style.transform = 'rotateY(' + (x * 7) + 'deg) rotateX(' + (-y * 6) + 'deg) translateZ(6px)';
+  });
+  card.addEventListener('pointerleave', function () {
+    card.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
+  });
+})();
+</script>
+</body>
+</html>
