@@ -46,6 +46,15 @@
 - [x] 🙋 가비아 DNS 설정 — A `api`→Lightsail IP, A `@`→76.76.21.21(Vercel 신규 IP 216.198.79.1은 국내에서 연결 불가라 구형 IP 사용), CNAME `www`→cname.vercel-dns.com. 대표 주소는 www.singunu.com(apex는 308 리다이렉트). 서버 ALLOWED_ORIGIN에 singunu.com·www·vercel.app 3개 등록, 재배포는 deploy.sh 사용(compose 아님)
 - [ ] 🙋 AWS Budget 비용 알람 + Anthropic 지출 한도 확인
 
+## Phase 5.5 — 페르소나 품질 (대화 퀄리티, 계획: `docs/PERSONA_QUALITY_PLAN.md`)
+
+- [ ] 🤖 답변 마크다운(`**` 등) 제거 — 시스템 프롬프트 규칙 + 프론트/서버 스트립
+- [ ] 🤖 `public_persona.md` 시점 분리 — `[현재 상태 — 기준일]` 섹션 신설, 상대 표현 제거, "기준일 이후는 폴백 유도" 지침
+- [ ] 🙋 먹거리·카페·음식점 취향 원본을 `me/` 볼트에 작성 (상호 공개 수위 결정 포함)
+- [ ] 🤖 취향 큐레이션 → `public_persona.md` 반영 → 🙋 검수 → 서버 재배포
+- [ ] 🤖 대화 로그(Atlas) 리뷰 1회전 — 폴백/차단 질문 추출 → 페르소나 갭 보강
+- [ ] 🙋 (반복) 상태 변화 시·분기 1회 `[현재 상태]` 기준일 갱신
+
 ## Phase 5 — QA·런칭
 
 - [x] 🤖 탈옥·프롬프트 주입 공격 시나리오 30+ → `docs/qa-report.md` (문서·정적분석 단계 — 47건 작성, L1/L3 결정론적 케이스는 테스트 고정. 실제 LLM 실행 검증은 API키 연결 후 리포트 4.4 체크리스트로)
