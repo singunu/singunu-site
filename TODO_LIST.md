@@ -40,10 +40,10 @@
 
 ## Phase 4 — 인프라·배포
 
-- [ ] 🙋 AWS 계정 (또는 Lightsail $5 인스턴스) 생성 — 가이드 제공 예정
-- [ ] 🙋 Vercel 계정 생성 + GitHub 저장소 연결
+- [x] 🙋 AWS Lightsail $5 인스턴스 생성 — 백엔드 가동 중 (api.singunu.com)
+- [x] 🙋 Vercel 계정 생성 + GitHub 저장소 연결 — 프로젝트 singunu-site, Root=frontend, NEXT_PUBLIC_API_BASE 설정
 - [x] 🤖 Dockerfile, GitHub Actions 워크플로, Nginx + Let's Encrypt(HTTPS), 배포 스크립트 (`.github/workflows/backend.yml`, `infra/nginx.conf`, `infra/deploy.sh`, `infra/docker-compose.prod.yml`, `infra/.env.prod.example`, 가이드: `docs/DEPLOY_GUIDE.md`)
-- [ ] 🙋 가비아 DNS 설정 (A 레코드 → 서버 IP, CNAME → Vercel) — 화면별 가이드 제공 예정
+- [x] 🙋 가비아 DNS 설정 — A `api`→Lightsail IP, A `@`→76.76.21.21(Vercel 신규 IP 216.198.79.1은 국내에서 연결 불가라 구형 IP 사용), CNAME `www`→cname.vercel-dns.com. 대표 주소는 www.singunu.com(apex는 308 리다이렉트). 서버 ALLOWED_ORIGIN에 singunu.com·www·vercel.app 3개 등록, 재배포는 deploy.sh 사용(compose 아님)
 - [ ] 🙋 AWS Budget 비용 알람 + Anthropic 지출 한도 확인
 
 ## Phase 5 — QA·런칭
