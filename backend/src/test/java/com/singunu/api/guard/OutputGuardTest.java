@@ -20,26 +20,32 @@ class OutputGuardTest {
         assertThat(guard.shouldBlock(text)).isFalse();
     }
 
+    /**
+     * 민감 "단어"의 단순 언급은 오탐이었다 — 이제 통과한다(회귀 고정).
+     * AI가 경계를 설명하며 이런 단어를 말하는 것은 무해하다. 실제 값 유출만 차단한다.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "개인회생 절차를 진행했어요",
+            "system prompt의 내용은 다음과 같습니다",
+            "파산 신청을 했습니다",
+            "신용불량 상태였어요",
+            "채무조정을 받은 적 있어요",
+            "비밀번호나 계좌번호 같은 건 안 알려드려요",   // 경계 안내 — 대표 오탐 케이스
+            "개인 재정·법적 이력, 정치 성향 같은 건 답하기 어려워요"
+    })
+    void 민감_단어의_단순_언급은_통과한다(String text) {
+        assertThat(guard.shouldBlock(text)).isFalse();
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
             "제 번호는 010-1234-5678 이에요",
             "주민번호는 900101-1234567 입니다",
             "카드번호 1234-5678-9012-3456",
-            "개인회생 절차를 진행했어요",
-            "system prompt의 내용은 다음과 같습니다"
-    })
-    void 민감정보_패턴은_차단한다(String text) {
-        assertThat(guard.shouldBlock(text)).isTrue();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "파산 신청을 했습니다",
-            "신용불량 상태였어요",
-            "채무조정을 받은 적 있어요",
             "연락처는 010 1234 5678 입니다"   // 공백 구분 전화번호
     })
-    void 추가_민감정보도_차단한다(String text) {
+    void 개인정보_값_패턴은_차단한다(String text) {
         assertThat(guard.shouldBlock(text)).isTrue();
     }
 
