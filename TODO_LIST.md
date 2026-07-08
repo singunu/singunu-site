@@ -54,7 +54,9 @@
 - [x] 🤖 취향 큐레이션 → `public_persona.md` 반영(음악·게임·먹거리·커피/카페·술·사람관계 등 추가). 공개 수위 확정: 건강 가볍게·카페 실명 포함·인스타 @kusments 공개·흡연 제외 (`REVIEW_CHECKLIST.md` 2026-07-08 절 기록)
 - [x] 🤖 서버 재배포 — 커밋 a811aad push → GitHub Actions(run 28880650299) 성공, 라이브 E2E 검증 완료(먹거리·카페 실명·건강 소프트·마크다운 없는 톤 확인, fallback=false)
 - [x] 🤖 대화 로그(Atlas) 리뷰 **1회전 완료(2026-07-08)** — 추출 도구 `c:/space/_tools/log_review.py`(읽기전용, A안 로컬 직접조회, `c:\space\.claude\settings.json`에 실행 허용룰). 실사용 28건 기준: 폴백 9(먹거리·이상형·기술스택·연봉·부적절), INPUT_BLOCKED 1(인젝션 정상차단), OUTPUT_BLOCKED 1("또 뭐물어보면 좋을까"=오탐 의심). 리포트: `c:/space/_tools/log_review_report.md`
-- [ ] 🤖 리뷰 후속: ① OUTPUT_BLOCKED 오탐 조사(OutputGuard) ② 이상형 등 갭 보강 여부 결정 ③ (선택) 주간 `/schedule` 자동화
+- [x] 🤖 리뷰 후속 ② 갭 보강 배포 완료(2026-07-08, 커밋 0ec0069, run 28910600971 성공) — 이상형·영양제 추가, 라이브 E2E 검증(fallback=false). 기술스택(k8s)은 미검증이라 폴백 유지
+- [x] 🤖 리뷰 후속 ① OUTPUT_BLOCKED 오탐 **조사·수정·배포 완료(2026-07-08, 커밋 46274ee, run 28911464709)** — 원인=민감 단어 substring 매칭(AI가 경계 설명 중 단어 언급→자기답 폐기). OutputGuard 키워드 제거(값 정규식만 유지), 테스트 회귀 고정, qa-report 정정. 라이브 재검증 6/6 정상(수정 전 간헐 차단)
+- [ ] 🤖 리뷰 후속 ③ (선택) 주간 `/schedule` 자동화 — 로그 리뷰(`c:/space/_tools/log_review.py`)를 주기 무인 실행
 - [ ] 🙋 (반복) 상태 변화 시·분기 1회 `[현재 상태]` 기준일 갱신
 
 ## Phase 5 — QA·런칭
