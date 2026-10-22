@@ -13,5 +13,6 @@
   };
   var s = {}; try { s = JSON.parse(g("omph-variants") || "{}"); } catch (e) {}
   var q = /(?:^|,)font:([123])(?:,|$)/.exec(new URLSearchParams(location.search).get("variant") || "");
-  window.omphFont(q ? q[1] : s.font);
+  // 배포 판(VITE_VARIANTS=off, index.html이 data-variants로 알려 줌)은 언제나 ①: 후보 글꼴을 받지도 그리지도 않는다
+  window.omphFont(d.dataset.variants === "off" ? "1" : q ? q[1] : s.font);
 })();
